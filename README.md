@@ -14,8 +14,6 @@ The aim of this project is to analyze a dataset containing employee turnover dat
 - Support Vector Machine
 - Optimization problem
 
-We will use the programming language R and develop the project in a Jupyter Notebook.
-
 ## Dataset
 The dataset we will be using is the [Employee Turnover](https://www.kaggle.com/datasets/davinwijaya/employee-turnover). This dataset contains information about the employees of a company such as satisfaction level, last evaluation, number of projects, average monthly hours, time spent at the company, whether they have had a work accident, whether they have been promoted, their department, salary level, and whether they left the company or not.
 
