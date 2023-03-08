@@ -1,4 +1,4 @@
-# MSCIDS_MPM02: Employee Turnover Prediction 
+# MSCIDS MPM02: Employee Turnover Prediction 
 
 This is a group project for the module **Applied Machine Learning and Predictive Modelling**. Our team consists of three students studying Applied Information and Data Science.
 
