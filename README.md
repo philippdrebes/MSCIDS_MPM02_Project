@@ -1,6 +1,6 @@
 # MSCIDS MPM02: Employee Turnover Prediction 
 
-This is a group project for the module **Applied Machine Learning and Predictive Modelling**. Our team consists of three students studying Applied Information and Data Science.
+This is a group project for the module **Applied Machine Learning and Predictive Modelling**, as part of the Applied Information and Data Science masters program at the Lucerne University of Applied Sciences and Arts.
 
 ## Project Overview
 
