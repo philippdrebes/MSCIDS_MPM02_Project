@@ -37,9 +37,8 @@ The following deliverables will be submitted for this project:
 To reproduce the analysis, follow these steps:
 
 1. Clone the project repository: `git clone https://github.com/philippdrebes/MSCIDS_MPM02_Project` 
-2. Install the required packages: `pip install -r requirements.txt`
-3. Launch Jupyter Notebook: `jupyter notebook`
-4. Open the `employee-turnover-prediction.ipynb` file and run the cells in order.
+2. Launch Jupyter Notebook: `jupyter notebook`
+3. Open the `employee-turnover-prediction.ipynb` file and run the cells in order.
 
 Note: You may need to adjust file paths in the notebook to match your local file system.
 
