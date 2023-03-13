@@ -1,6 +1,6 @@
-install.packages(c("caret", "vtreat", "corrplot"), quiet=TRUE)
+install.packages(c("caret", "vtreat", "ggcorrplot"), quiet=TRUE)
 # library(tidyverse, quietly = T)
 library(caret, quietly = T)
 library(vtreat, quietly = T)
-library(corrplot, quietly = T)
+library(ggcorrplot, quietly = T)
 library(readr,  quietly = T)
