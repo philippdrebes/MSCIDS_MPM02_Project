@@ -52,19 +52,33 @@ turnover.oh <- data.frame(predict(dummy, newdata=df))
 In this chapter, we will be exploring Regression, which is a type of machine learning algorithm used for predicting numerical values. We will explain how regression works, how to train a regression model, and how to use it to predict the likelihood of an employee leaving the company.
 
 ```{r}
-ggcorrplot(cor(turnover.oh), hc.order = TRUE)
+correlationMatrix <- cor(turnover.oh)
+ggcorrplot(correlationMatrix, hc.order = TRUE)
+
+# find attributes that are highly corrected ( > 0.75 )
+highlyCorrelated <- findCorrelation(correlationMatrix, cutoff=0.75)
+highlyCorrelated <- sort(highlyCorrelated)
+
+# print indexes of highly correlated attributes
+print(highlyCorrelated)
+names(turnover.oh[highlyCorrelated])
+
+turnover.reduced = turnover.oh[,-c(highlyCorrelated)]
+
+ggcorrplot(cor(turnover.reduced), hc.order = TRUE)
 ```
 
-
 ```{r}
-fit <- lm(event ~ ., data = turnover)
+fit <- lm(event ~ ., data = turnover.reduced)
 summary(fit)
 ```
 
 #### Interpretation
+
 It appears that this model has not a good fit...
 
 ### Non-linearities
+
 First we inspect all numerical coefficients for non-linearities.
 
 ```{r}
@@ -108,7 +122,7 @@ plot.innovator <- gg.innovator + geom_smooth()
 grid.arrange(plot.age, plot.extraversion, gg.independence, plot.selfcontrol, plot.anxiety, plot.innovator, ncol=2)
 ```
 
-It appears that only the factor age has a non-linear behavior. We will use a GAM to find its complexity. 
+It appears that only the factor age has a non-linear behavior. We will use a GAM to find its complexity.
 
 ```{r}
 gam.turnover.1 <- gam(event ~ traffic + way + s(age), 
@@ -118,7 +132,40 @@ summary(gam.turnover.1)
 plot(gam.turnover.1, residuals = TRUE, select = 1)
 ```
 
+### Feature Selection
 
+```{r}
+# ensure results are repeatable
+set.seed(7)
+# load the library
+library(mlbench)
+library(caret)
+library(arm)
+
+# prepare training scheme
+control <- trainControl(method="repeatedcv", number=10, repeats=3)
+# train the model
+model <- train(event~., data=turnover.reduced, method="glm", preProcess="scale", trControl=control)
+# estimate variable importance
+importance <- varImp(model, scale=FALSE)
+
+# summarize importance
+print(importance)
+# plot importance
+plot(importance)
+
+summary(model)
+```
+
+### GLM
+
+```{r}
+glm.turnover <- glm(event ~ traffic + way + age + profession, 
+                   data = turnover, family = binomial)
+summary(glm.turnover)
+
+plot(glm.turnover)
+```
 
 ## Support Vector Machines
 
@@ -135,4 +182,3 @@ In this chapter, we will be exploring Artificial Neural Networks (ANN). ANN is a
 ```{r}
 
 ```
-
