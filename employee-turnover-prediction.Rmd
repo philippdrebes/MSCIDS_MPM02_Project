@@ -27,6 +27,10 @@ Welcome to our project on employee turnover prediction! In this project, we will
 
 Employee turnover is a critical issue for companies, as it can result in significant costs such as recruitment, training, and lost productivity. Identifying factors that contribute to employee turnover and developing accurate predictive models can help companies better understand employee behavior and improve employee retention.
 
+TODO\
+Check if response var is balanced\
+preProcess
+
 ## Preparation
 
 ```{r}
