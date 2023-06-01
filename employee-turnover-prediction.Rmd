@@ -3,7 +3,8 @@ title: "Employee Turnover Prediction"
 author: "Albesa Istrefaj, Antonia Durisch, Philipp Drebes"
 date: "`r Sys.Date()`"
 output:
-  pdf_document: default
+  pdf_document:
+    keep_tex: yes
   html_document:
     df_print: paged
 ---
@@ -12,17 +13,11 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# MSCIDS MPM02: Employee Turnover Prediction
-
 ## Introduction
 
 Welcome to our project on employee turnover prediction! In this project, we will be using various machine learning algorithms to analyze a dataset containing employee turnover data and develop predictive models.
 
 Employee turnover is a critical issue for companies, as it can result in significant costs such as recruitment, training, and lost productivity. Identifying factors that contribute to employee turnover and developing accurate predictive models can help companies better understand employee behavior and improve employee retention.
-
-TODO\
-Check if response var is balanced\
-preProcess
 
 ## Preparation and Exploration
 
@@ -40,13 +35,16 @@ library(gridExtra, quietly = T)
 library(mgcv, quietly = T)
 library(e1071, quietly = T)
 library(dplyr, quietly = T)
+library(mlbench, quietly = T)
+library(caret, quietly = T)
+library(arm, quietly = T)
 ```
 
 Load and inspect the data.
 
 ```{r}
 turnover <- read_csv('data/turnover.csv', col_names=TRUE)
-summary(turnover)
+# summary(turnover)
 
 # Having a look at the structure.
 str(turnover)
@@ -56,16 +54,20 @@ str(turnover)
 
 ```{r}
 # scatterplot of stag vs. extraversion
-ggplot(data = turnover, aes(x = stag, y = extraversion)) +
+plot.scatter <- ggplot(data = turnover, aes(x = stag, y = extraversion)) +
   geom_point()
 
 # visualizing the distribution of a categorical variable - distribution of industry
-ggplot(data = turnover, aes(x = industry)) +
+plot.distca <- ggplot(data = turnover, aes(x = industry)) +
   geom_bar()
 
 # distribution of a continuous variable - box plot of age by gender
-ggplot(data = turnover, aes(x = gender, y = age)) +
+plot.distco <- ggplot(data = turnover, aes(x = gender, y = age)) +
   geom_boxplot()
+
+grid.arrange(plot.scatter, plot.distca, plot.distco, ncol=2)
+
+par(mfrow = c(2,3))
 
 # histogram of the age
 hist(turnover$age)
@@ -189,10 +191,6 @@ plot(gam.turnover.1, residuals = TRUE, select = 1)
 ```{r}
 # ensure results are repeatable
 set.seed(7)
-# load the library
-library(mlbench)
-library(caret)
-library(arm)
 
 # prepare training scheme
 control <- trainControl(method="repeatedcv", number=10, repeats=3)
@@ -240,20 +238,13 @@ test_truth <- turnover.reduced %>%
 ## Train the Neural Network
 
 ```{r}
-
 # Fit the SVM model on the training data
-svm_model <- svm(event ~ ., data = train, kernel = "linear", 
-                 type = "C-classification", scale = TRUE, cost = 10)
+svm_model <- svm(event ~ ., data = train, kernel = "linear",
+                 type = "C-classification", scale = TRUE, cost = 100)
 
 
 # Make predictions on the testing data
 test_pred <- predict(svm_model, newdata = test_in)
-table(test_pred)
-
-
-# Assess the accuracy of the predictions
-accuracy <- mean(test_pred == turnover.reduced$event)
-accuracy
 
 # Convert test_truth to a factor with the same levels as test_pred
 test_truth <- factor(test_truth, levels = levels(test_pred))
@@ -262,6 +253,8 @@ test_truth <- factor(test_truth, levels = levels(test_pred))
 conf_matrix <- confusionMatrix(test_pred, test_truth)
 conf_matrix
 ```
+
+Conclusion
 
 ## Artificial Neural Networks
 
