@@ -29,14 +29,17 @@ preProcess
 Load the libraries.
 
 ```{r}
-library(vioplot)
-library(caret)
-library(vtreat)
-library(ggcorrplot)
-library(readr)
-library(ggplot2)
-library(gridExtra)
-library(mgcv)
+library(tidyverse, quietly = T)
+library(vioplot, quietly = T)
+library(caret, quietly = T)
+library(vtreat, quietly = T)
+library(ggcorrplot, quietly = T)
+library(readr, quietly = T)
+library(ggplot2, quietly = T)
+library(gridExtra, quietly = T)
+library(mgcv, quietly = T)
+library(e1071, quietly = T)
+library(dplyr, quietly = T)
 ```
 
 Load and inspect the data.
@@ -46,52 +49,52 @@ turnover <- read_csv('data/turnover.csv', col_names=TRUE)
 summary(turnover)
 
 # Having a look at the structure.
-str(HRdata)
+str(turnover)
 ```
 
 ## Exploration
 
 ```{r}
 # scatterplot of stag vs. extraversion
-ggplot(data = HRdata, aes(x = stag, y = extraversion)) +
+ggplot(data = turnover, aes(x = stag, y = extraversion)) +
   geom_point()
 
 # visualizing the distribution of a categorical variable - distribution of industry
-ggplot(data = HRdata, aes(x = industry)) +
+ggplot(data = turnover, aes(x = industry)) +
   geom_bar()
 
 # distribution of a continuous variable - box plot of age by gender
-ggplot(data = HRdata, aes(x = gender, y = age)) +
+ggplot(data = turnover, aes(x = gender, y = age)) +
   geom_boxplot()
 
 # histogram of the age
-hist(HRdata$age)
+hist(turnover$age)
 
 # boxplot of the age
-boxplot(HRdata$age)
+boxplot(turnover$age)
 
 # plot of age and extraversion
-plot(HRdata$age, HRdata$extraversion)
+plot(turnover$age, turnover$extraversion)
 
 # barplot of gender - male and female
-barplot(table(HRdata$gender))
+barplot(table(turnover$gender))
 
 # density plots
-plot(density(HRdata$age))
+plot(density(turnover$age))
 
 # violin plot
-vioplot(HRdata$age)
+vioplot(turnover$age)
 ```
 
 ### One-Hot encoding
 
 ```{r}
-dummy <- dummyVars(" ~ .", data=df)
+dummy <- dummyVars(" ~ .", data=turnover)
 
 #perform one-hot encoding on data frame
-turnover.oh <- data.frame(predict(dummy, newdata=df))
+turnover.oh <- data.frame(predict(dummy, newdata=turnover))
 
-#summary(turnover.oh)
+str(turnover.oh)
 ```
 
 ## Linear Models
@@ -221,20 +224,43 @@ plot(glm.turnover)
 In this chapter, we will be exploring the Support Vector Machines (SVM) algorithm. SVM is a powerful algorithm for classification and regression, and is commonly used in machine learning. We will explain how SVM works, how to train an SVM model, and how to use it to predict employee turnover.
 
 ```{r}
-# Split the data into training and testing sets
 set.seed(123)
-train_index <- createDataPartition(dummy_data[, "event"], p = 0.7, list = FALSE)
-train_data <- dummy_data[train_index, ]
-test_data <- dummy_data[-train_index, ]
+indices <- createDataPartition(turnover.reduced$event, p=.85, list = F)
+
+train <- turnover.reduced %>%
+  slice(indices[, 1])
+test_in <- turnover.reduced %>%
+  slice(-indices[, 1]) %>%
+  dplyr::select(-event)
+test_truth <- turnover.reduced %>%
+  slice(-indices[, 1]) %>%
+  pull(event)
+```
+
+## Train the Neural Network
+
+```{r}
 
 # Fit the SVM model on the training data
-svm_model <- svm(event ~ ., data = train_data, kernel = "linear", scale = TRUE, cost = 10)
+svm_model <- svm(event ~ ., data = train, kernel = "linear", 
+                 type = "C-classification", scale = TRUE, cost = 10)
+
 
 # Make predictions on the testing data
-predictions <- predict(svm_model, newdata = test_data)
+test_pred <- predict(svm_model, newdata = test_in)
+table(test_pred)
+
+
+# Assess the accuracy of the predictions
+accuracy <- mean(test_pred == turnover.reduced$event)
+accuracy
+
+# Convert test_truth to a factor with the same levels as test_pred
+test_truth <- factor(test_truth, levels = levels(test_pred))
 
 # Evaluate the performance of the model using confusion matrix
-confusionMatrix(predictions, test_data$event)
+conf_matrix <- confusionMatrix(test_pred, test_truth)
+conf_matrix
 ```
 
 ## Artificial Neural Networks
