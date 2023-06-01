@@ -10,13 +10,6 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-library(caret)
-library(vtreat)
-library(ggcorrplot)
-library(readr)
-library(ggplot2)
-library(gridExtra)
-library(mgcv)
 ```
 
 # MSCIDS MPM02: Employee Turnover Prediction
@@ -31,11 +24,63 @@ TODO\
 Check if response var is balanced\
 preProcess
 
-## Preparation
+## Preparation and Exploration
+
+Load the libraries.
+
+```{r}
+library(vioplot)
+library(caret)
+library(vtreat)
+library(ggcorrplot)
+library(readr)
+library(ggplot2)
+library(gridExtra)
+library(mgcv)
+```
+
+Load and inspect the data.
 
 ```{r}
 turnover <- read_csv('data/turnover.csv', col_names=TRUE)
 summary(turnover)
+
+# Having a look at the structure.
+str(HRdata)
+```
+
+## Exploration
+
+```{r}
+# scatterplot of stag vs. extraversion
+ggplot(data = HRdata, aes(x = stag, y = extraversion)) +
+  geom_point()
+
+# visualizing the distribution of a categorical variable - distribution of industry
+ggplot(data = HRdata, aes(x = industry)) +
+  geom_bar()
+
+# distribution of a continuous variable - box plot of age by gender
+ggplot(data = HRdata, aes(x = gender, y = age)) +
+  geom_boxplot()
+
+# histogram of the age
+hist(HRdata$age)
+
+# boxplot of the age
+boxplot(HRdata$age)
+
+# plot of age and extraversion
+plot(HRdata$age, HRdata$extraversion)
+
+# barplot of gender - male and female
+barplot(table(HRdata$gender))
+
+# density plots
+plot(density(HRdata$age))
+
+# violin plot
+vioplot(HRdata$age)
 ```
 
 ### One-Hot encoding
@@ -130,7 +175,7 @@ It appears that only the factor age has a non-linear behavior. We will use a GAM
 
 ```{r}
 gam.turnover.1 <- gam(event ~ traffic + way + s(age), 
-                   data = turnover, family = binomial)
+                      data = turnover, family = binomial)
 summary(gam.turnover.1)
 
 plot(gam.turnover.1, residuals = TRUE, select = 1)
@@ -165,7 +210,7 @@ summary(model)
 
 ```{r}
 glm.turnover <- glm(event ~ traffic + way + age + profession, 
-                   data = turnover, family = binomial)
+                    data = turnover, family = binomial)
 summary(glm.turnover)
 
 plot(glm.turnover)
@@ -176,7 +221,20 @@ plot(glm.turnover)
 In this chapter, we will be exploring the Support Vector Machines (SVM) algorithm. SVM is a powerful algorithm for classification and regression, and is commonly used in machine learning. We will explain how SVM works, how to train an SVM model, and how to use it to predict employee turnover.
 
 ```{r}
+# Split the data into training and testing sets
+set.seed(123)
+train_index <- createDataPartition(dummy_data[, "event"], p = 0.7, list = FALSE)
+train_data <- dummy_data[train_index, ]
+test_data <- dummy_data[-train_index, ]
 
+# Fit the SVM model on the training data
+svm_model <- svm(event ~ ., data = train_data, kernel = "linear", scale = TRUE, cost = 10)
+
+# Make predictions on the testing data
+predictions <- predict(svm_model, newdata = test_data)
+
+# Evaluate the performance of the model using confusion matrix
+confusionMatrix(predictions, test_data$event)
 ```
 
 ## Artificial Neural Networks
