@@ -380,7 +380,26 @@ test_truth <- turnover.reduced %>%
 ```{r}
 # Fit the SVM model on the training data
 svm_model <- svm(event ~ ., data = train, kernel = "linear",
-                 type = "C-classification", scale = TRUE, cost = 100)
+                 type = "C-classification", scale = TRUE, cost = 10)
+
+
+# Make predictions on the testing data
+test_pred <- predict(svm_model, newdata = test_in)
+
+# Convert test_truth to a factor with the same levels as test_pred
+test_truth <- factor(test_truth, levels = levels(test_pred))
+
+# Evaluate the performance of the model using confusion matrix
+conf_matrix <- confusionMatrix(test_pred, test_truth)
+conf_matrix
+```
+
+Let's try a different kernel
+
+```{r}
+# Fit the SVM model on the training data
+svm_model <- svm(event ~ ., data = train, kernel = "radial",
+                 type = "C-classification", scale = TRUE, cost = 10)
 
 
 # Make predictions on the testing data
