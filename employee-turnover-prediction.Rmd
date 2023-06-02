@@ -286,7 +286,7 @@ test_truth <- turnover.reduced %>%
   pull(event)
 ```
 
-## Train the Neural Network
+### Train the Neural Network
 
 ```{r}
 # Fit the SVM model on the training data
