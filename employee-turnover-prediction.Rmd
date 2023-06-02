@@ -19,6 +19,29 @@ Welcome to our project on employee turnover prediction! In this project, we will
 
 Employee turnover is a critical issue for companies, as it can result in significant costs such as recruitment, training, and lost productivity. Identifying factors that contribute to employee turnover and developing accurate predictive models can help companies better understand employee behavior and improve employee retention.
 
+## Data set
+
+The dataset we will be using is the [Employee Turnover](https://www.kaggle.com/datasets/davinwijaya/employee-turnover) data set. This data set contains the following information about the employees of a company.
+
+| Column       | Description                                                                                                                                                |
+|--------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| stag         | Experience (time)                                                                                                                                          |
+| event        | Employee turnover                                                                                                                                          |
+| gender       | Employee's gender, female(f), or male(m)                                                                                                                   |
+| age          | Employee's age (year)                                                                                                                                      |
+| industry     | Employee's Industry                                                                                                                                        |
+| profession   | Employee's profession                                                                                                                                      |
+| traffic      | From what pipelene candidate came to the company                                                                                                           |
+| coach        | Presence of a coach (training) on probation                                                                                                                |
+| head_gender  | head (supervisor) gender                                                                                                                                   |
+| greywage     | Greywage in Russia or Ukraine means that the employer (company) pays just a tiny bit amount of salary above the white-wage (white-wage means minimum wage) |
+| way          | how an employee gets to workplace (by feet, by bus etc)                                                                                                    |
+| extraversion | result from Big Five personality test                                                                                                                      |
+| independ     | result from Big Five personality test                                                                                                                      |
+| selfcontrol  | result from Big Five personality test                                                                                                                      |
+| anxiety      | result from Big Five personality test                                                                                                                      |
+| novator      | result from Big Five personality test                                                                                                                      |
+
 ## Preparation and Exploration
 
 Load the libraries.
@@ -123,14 +146,16 @@ turnover.reduced = turnover.oh[,-c(highlyCorrelated)]
 ggcorrplot(cor(turnover.reduced), hc.order = TRUE)
 ```
 
+Our primary research topic is employee turnover, which is recorded by the binomial variable `event` in our data set. Later we will analyze this dependent variable with the use of GLMs, GAMs, SVM and ANN.
+
+First let's try if we can predict the experience (time) of an employee, given their industry, profession, age and gender. As we expect them to have an effect.
+
 ```{r}
-fit <- lm(event ~ ., data = turnover.reduced)
+fit <- lm(stag ~ industry + profession + age + gender, data = turnover)
 summary(fit)
 ```
 
-#### Interpretation
-
-It appears that this simple linear model has not a good fit. Only 14% of the variation is explained by the model.
+We see that we have multiple significant factors in our model. However, only around 11% of the variance is explained by the model. It might not be as useful for further predictions and we would need to gather more data.
 
 ### Non-linearities
 
@@ -184,6 +209,9 @@ It appears that only the factor age has a non-linear behavior. We will use a GAM
 Performing feature selection before training a model can be a good practice to improve model performance and reduce overfitting. Here we use recursive feature elimination (RFE) before training the model. We will again use only the one-hot encoded data set with correlating features included, as we expect the feature selection process to take care of it.
 
 ```{r}
+set.seed(12)
+turnover.oh$event = as.factor(turnover.oh$event)
+
 # Define the control parameters for feature selection
 control <- rfeControl(functions = rfFuncs, method = "cv", number = 10)
 
@@ -220,9 +248,7 @@ selected_features <- names(turnover.reduced[, -2])[rfe_result$optVariables]
 print(selected_features)
 ```
 
-No features where selected. Therefore, we will use again the `turnover.reduced` data set.
-
-We will try a different approach.
+No features where selected. Therefore, we will use again the `turnover.reduced` data set. We will try a different approach.
 
 ```{r}
 # ensure results are repeatable
@@ -238,7 +264,7 @@ cl <- makeCluster(8)  # number of cores as per your machine
 registerDoParallel(cl)
 
 # train the model
-model.gam <- train(event ~ ., data=turnover.oh, 
+model.gam <- train(event ~ ., data=turnover.reduced, family = "binomial", 
                method="gam", preProcess=c("scale", "center"), trControl=control)
 
 # Stop the parallel processing
@@ -254,18 +280,81 @@ plot(importance)
 
 summary(model.gam)
 plot(model.gam, residuals = TRUE)
+AIC(model.gam$finalModel)
 ```
 
-Still not a good fit, with only around 12% of the variance explained by the model. Also we see, that the feature selection only has a slight, almost negligable, impact on accuracy.
+Still not a good fit, with only around 12% of the variance explained by the model. Also we see, that the feature selection only has a slight, almost negligible, impact on accuracy.
 
 ### Generalized Linear Models
 
-```{r}
-glm.turnover <- glm(event ~ traffic + way + age + profession, 
-                    data = turnover, family = binomial)
-summary(glm.turnover)
+Next we fit a generalized linear model in order to predict employee turnover.
 
-plot(glm.turnover)
+```{r}
+# ensure results are repeatable
+set.seed(12)
+
+turnover.reduced$event = as.factor(turnover.reduced$event)
+
+# prepare training scheme
+control <- trainControl(method="repeatedcv", number=10, repeats=3)
+
+# Enable parallel processing
+cl <- makeCluster(8)  # number of cores as per your machine
+registerDoParallel(cl)
+
+# train the model
+model.glm <- train(event ~ ., data=turnover.reduced, family = "binomial", 
+               method="glm", preProcess=c("scale", "center"), trControl=control)
+
+# Stop the parallel processing
+stopCluster(cl)
+unregister_dopar()
+
+# estimate variable importance
+importance <- varImp(model.glm, scale=FALSE)
+
+# summarize importance
+# print(importance)
+plot(importance)
+
+summary(model.glm)
+```
+
+We also want to try to predict an employees age by their amount of experience and multiple other factors.
+
+```{r}
+# Make sure all ages are integers
+turnover.reduced$age <- as.integer(turnover.reduced$age)
+
+glm.age <- glm(age ~ ., data = turnover.reduced, family = "poisson")
+summary(glm.age)
+
+
+set.seed(2)
+
+# prepare training scheme
+control <- trainControl(method="repeatedcv", number=10, repeats=3)
+
+# Enable parallel processing
+cl <- makeCluster(8)  # number of cores as per your machine
+registerDoParallel(cl)
+
+# train the model
+model.glm <- train(age ~ ., data=turnover.reduced, family = "poisson", 
+               method="glm", preProcess=c("scale", "center"), trControl=control)
+
+# Stop the parallel processing
+stopCluster(cl)
+unregister_dopar()
+
+# estimate variable importance
+importance <- varImp(model.glm, scale=FALSE)
+
+# summarize importance
+# print(importance)
+plot(importance)
+
+summary(model.glm)
 ```
 
 ## Support Vector Machines
