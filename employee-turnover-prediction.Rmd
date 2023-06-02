@@ -24,7 +24,7 @@ Employee turnover is a critical issue for companies, as it can result in signifi
 The dataset we will be using is the [Employee Turnover](https://www.kaggle.com/datasets/davinwijaya/employee-turnover) data set. This data set contains the following information about the employees of a company.
 
 | Column       | Description                                                                                                                                                |
-|--------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|-------------|-----------------------------------------------------------|
 | stag         | Experience (time)                                                                                                                                          |
 | event        | Employee turnover                                                                                                                                          |
 | gender       | Employee's gender, female(f), or male(m)                                                                                                                   |
@@ -359,7 +359,7 @@ summary(model.glm)
 
 ## Support Vector Machines
 
-In this chapter, we will be exploring the Support Vector Machines (SVM) algorithm. SVM is a powerful algorithm for classification and regression, and is commonly used in machine learning. We will explain how SVM works, how to train an SVM model, and how to use it to predict employee turnover.
+In this chapter, we will be use Support Vector Machines (SVM) in order to predict employee turnover.
 
 ```{r}
 set.seed(123)
