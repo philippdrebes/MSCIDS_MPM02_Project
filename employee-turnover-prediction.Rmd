@@ -123,11 +123,15 @@ turnover.oh <- data.frame(predict(dummy, newdata=turnover))
 str(turnover.oh)
 ```
 
-## Linear Models
+We will normalize all scalar values.
 
-In this chapter, we will be exploring linear models and try to use them to predict the likelihood of an employee leaving the company.
+```{r}
+# Normalize selected columns
+columns_to_normalize <- c("extraversion", "independ", "selfcontrol", "anxiety", "novator", "age", "stag")
+turnover.oh[columns_to_normalize] <- scale(turnover.oh[columns_to_normalize], center = FALSE, scale = apply(turnover.oh[columns_to_normalize], 2, range)[2, ] - apply(turnover.oh[columns_to_normalize], 2, range)[1, ])
+```
 
-First we start by removing highly correlated variables from our data set, as they might have a negative influence on our models.
+Next we remove highly correlated variables from our data set, as they might have a negative influence on our models.
 
 ```{r}
 correlationMatrix <- cor(turnover.oh)
@@ -146,6 +150,17 @@ turnover.reduced = turnover.oh[,-c(highlyCorrelated)]
 ggcorrplot(cor(turnover.reduced), hc.order = TRUE)
 ```
 
+The data types of some variables need to be modified.
+
+```{r}
+turnover.reduced$event = as.factor(turnover.reduced$event) # Convert event as factor
+turnover.reduced$age <- as.integer(turnover.reduced$age) # Make sure all ages are integers
+```
+
+## Linear Models
+
+In this chapter, we will be exploring linear models and try to use them to predict the likelihood of an employee leaving the company.
+
 Our primary research topic is employee turnover, which is recorded by the binomial variable `event` in our data set. Later we will analyze this dependent variable with the use of GLMs, GAMs, SVM and ANN.
 
 First let's try if we can predict the experience (time) of an employee, given their industry, profession, age and gender. As we expect them to have an effect.
@@ -162,7 +177,6 @@ We see that we have multiple significant factors in our model. However, only aro
 First we inspect all numerical coefficients for non-linearities.
 
 ```{r}
-
 ## Age
 gg.age <- ggplot(data = turnover, mapping = aes(y = event, x = age)) + 
   geom_point()
@@ -210,7 +224,6 @@ Performing feature selection before training a model can be a good practice to i
 
 ```{r}
 set.seed(12)
-turnover.oh$event = as.factor(turnover.oh$event)
 
 # Define the control parameters for feature selection
 control <- rfeControl(functions = rfFuncs, method = "cv", number = 10)
@@ -254,8 +267,6 @@ No features where selected. Therefore, we will use again the `turnover.reduced` 
 # ensure results are repeatable
 set.seed(12)
 
-turnover.reduced$event = as.factor(turnover.reduced$event)
-
 # prepare training scheme
 control <- trainControl(method="repeatedcv", number=10, repeats=3)
 
@@ -293,8 +304,6 @@ Next we fit a generalized linear model in order to predict employee turnover.
 # ensure results are repeatable
 set.seed(12)
 
-turnover.reduced$event = as.factor(turnover.reduced$event)
-
 # prepare training scheme
 control <- trainControl(method="repeatedcv", number=10, repeats=3)
 
@@ -323,9 +332,6 @@ summary(model.glm)
 We also want to try to predict an employees age by their amount of experience and multiple other factors.
 
 ```{r}
-# Make sure all ages are integers
-turnover.reduced$age <- as.integer(turnover.reduced$age)
-
 glm.age <- glm(age ~ ., data = turnover.reduced, family = "poisson")
 summary(glm.age)
 
@@ -363,7 +369,6 @@ In this chapter, we will be use Support Vector Machines (SVM) in order to predic
 
 ```{r}
 set.seed(123)
-turnover.reduced$event = as.factor(turnover.reduced$event)
 indices <- createDataPartition(turnover.reduced$event, p=.85, list = F)
 
 train <- turnover.reduced %>%
