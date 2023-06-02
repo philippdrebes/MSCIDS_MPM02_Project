@@ -23,7 +23,7 @@ Employee turnover is a critical issue for companies, as it can result in signifi
 
 Load the libraries.
 
-```{r}
+```{r, message=FALSE, warning=FALSE, results='hide'}
 library(tidyverse, quietly = T)
 library(vioplot, quietly = T)
 library(caret, quietly = T)
@@ -38,6 +38,7 @@ library(dplyr, quietly = T)
 library(mlbench, quietly = T)
 library(caret, quietly = T)
 library(arm, quietly = T)
+library(doParallel, quietly = T)
 ```
 
 Load and inspect the data.
@@ -101,9 +102,9 @@ str(turnover.oh)
 
 ## Linear Models
 
-### Naive Approach
+In this chapter, we will be exploring linear models and try to use them to predict the likelihood of an employee leaving the company.
 
-In this chapter, we will be exploring Regression, which is a type of machine learning algorithm used for predicting numerical values. We will explain how regression works, how to train a regression model, and how to use it to predict the likelihood of an employee leaving the company.
+First we start by removing highly correlated variables from our data set, as they might have a negative influence on our models.
 
 ```{r}
 correlationMatrix <- cor(turnover.oh)
@@ -129,7 +130,7 @@ summary(fit)
 
 #### Interpretation
 
-It appears that this model has not a good fit...
+It appears that this simple linear model has not a good fit. Only 14% of the variation is explained by the model.
 
 ### Non-linearities
 
@@ -178,36 +179,86 @@ grid.arrange(plot.age, plot.extraversion, gg.independence, plot.selfcontrol, plo
 
 It appears that only the factor age has a non-linear behavior. We will use a GAM to find its complexity.
 
-```{r}
-gam.turnover.1 <- gam(event ~ traffic + way + s(age), 
-                      data = turnover, family = binomial)
-summary(gam.turnover.1)
+#### Training the model
 
-plot(gam.turnover.1, residuals = TRUE, select = 1)
+Performing feature selection before training a model can be a good practice to improve model performance and reduce overfitting. Here we use recursive feature elimination (RFE) before training the model. We will again use only the one-hot encoded data set with correlating features included, as we expect the feature selection process to take care of it.
+
+```{r}
+# Define the control parameters for feature selection
+control <- rfeControl(functions = rfFuncs, method = "cv", number = 10)
+
+# Specify the formula for the GAM model
+formula <- event ~ s(age, bs = "tp", k = -1) + .
+
+# Define a smaller range of subset sizes
+subset_sizes <- c(1:10)
+
+# Reduce the number of values in the tuning grid
+tune_grid <- data.frame(nselect = 1:10)
+
+# Enable parallel processing
+cl <- makeCluster(8)  # number of cores as per your machine
+registerDoParallel(cl)
+
+# Run the feature selection algorithm
+rfe_result <- rfe(turnover.oh[, -2], turnover.oh$event,
+                   sizes = subset_sizes, rfeControl = control,
+                   method = "gam", tuneGrid = tune_grid, verbose = FALSE)
+
+# Stop the parallel processing
+stopCluster(cl)
+
+unregister_dopar <- function() {
+  env <- foreach:::.foreachGlobals
+  rm(list=ls(name=env), pos=env)
+}
+
+unregister_dopar()
+
+# Get the selected features
+selected_features <- names(turnover.reduced[, -2])[rfe_result$optVariables]
+print(selected_features)
 ```
 
-### Feature Selection
+No features where selected. Therefore, we will use again the `turnover.reduced` data set.
+
+We will try a different approach.
 
 ```{r}
 # ensure results are repeatable
-set.seed(7)
+set.seed(12)
+
+turnover.reduced$event = as.factor(turnover.reduced$event)
 
 # prepare training scheme
 control <- trainControl(method="repeatedcv", number=10, repeats=3)
+
+# Enable parallel processing
+cl <- makeCluster(8)  # number of cores as per your machine
+registerDoParallel(cl)
+
 # train the model
-model <- train(event~., data=turnover.reduced, method="glm", preProcess="scale", trControl=control)
+model.gam <- train(event ~ ., data=turnover.oh, 
+               method="gam", preProcess=c("scale", "center"), trControl=control)
+
+# Stop the parallel processing
+stopCluster(cl)
+unregister_dopar()
+
 # estimate variable importance
-importance <- varImp(model, scale=FALSE)
+importance <- varImp(model.gam, scale=FALSE)
 
 # summarize importance
-print(importance)
-# plot importance
+# print(importance)
 plot(importance)
 
-summary(model)
+summary(model.gam)
+plot(model.gam, residuals = TRUE)
 ```
 
-### GLM
+Still not a good fit, with only around 12% of the variance explained by the model. Also we see, that the feature selection only has a slight, almost negligable, impact on accuracy.
+
+### Generalized Linear Models
 
 ```{r}
 glm.turnover <- glm(event ~ traffic + way + age + profession, 
@@ -254,7 +305,7 @@ conf_matrix <- confusionMatrix(test_pred, test_truth)
 conf_matrix
 ```
 
-Conclusion
+### Conclusion
 
 ## Artificial Neural Networks
 
