@@ -24,7 +24,7 @@ Employee turnover is a critical issue for companies, as it can result in signifi
 The dataset we will be using is the [Employee Turnover](https://www.kaggle.com/datasets/davinwijaya/employee-turnover) data set. This data set contains the following information about the employees of a company.
 
 | Column       | Description                                                                                                                                                |
-|-------------|-----------------------------------------------------------|
+|-------------------|-----------------------------------------------------|
 | stag         | Experience (time)                                                                                                                                          |
 | event        | Employee turnover                                                                                                                                          |
 | gender       | Employee's gender, female(f), or male(m)                                                                                                                   |
@@ -363,6 +363,7 @@ In this chapter, we will be use Support Vector Machines (SVM) in order to predic
 
 ```{r}
 set.seed(123)
+turnover.reduced$event = as.factor(turnover.reduced$event)
 indices <- createDataPartition(turnover.reduced$event, p=.85, list = F)
 
 train <- turnover.reduced %>%
@@ -378,13 +379,19 @@ test_truth <- turnover.reduced %>%
 ### Train the Neural Network
 
 ```{r}
+set.seed(100)
 # Fit the SVM model on the training data
-svm_model <- svm(event ~ ., data = train, kernel = "linear",
-                 type = "C-classification", scale = TRUE, cost = 10)
+#svm.linear <- svm(event ~ ., data = train, kernel = "linear",
+#                 type = "C-classification", scale = TRUE, cost = 10)
 
+tune.out <- tune(
+  svm, event ~ ., data = train, kernel = "linear", type = "C-classification", scale = TRUE,
+  ranges = list(cost = c(0.001, 0.01, 0.1, 1, 5, 10, 100))
+)
+svm.linear <- tune.out$best.model
 
 # Make predictions on the testing data
-test_pred <- predict(svm_model, newdata = test_in)
+test_pred <- predict(svm.linear, newdata = test_in)
 
 # Convert test_truth to a factor with the same levels as test_pred
 test_truth <- factor(test_truth, levels = levels(test_pred))
@@ -394,16 +401,21 @@ conf_matrix <- confusionMatrix(test_pred, test_truth)
 conf_matrix
 ```
 
-Let's try a different kernel
+Now we will use the `tune` function again and also try different kernels for the SVM algorithm.
 
 ```{r}
-# Fit the SVM model on the training data
-svm_model <- svm(event ~ ., data = train, kernel = "radial",
-                 type = "C-classification", scale = TRUE, cost = 10)
+set.seed(99)
+tune.out <- tune(
+  svm, event ~ ., data = train, type = "C-classification", scale = TRUE,
+  ranges = list(cost = c(0.001, 0.01, 0.1, 1, 5, 10, 100), 
+                kernel = c("linear", "radial", "polynomial", "sigmoid"))
+)
+print(tune.out)
 
+svm.best <- tune.out$best.model
 
 # Make predictions on the testing data
-test_pred <- predict(svm_model, newdata = test_in)
+test_pred <- predict(svm.best, newdata = test_in)
 
 # Convert test_truth to a factor with the same levels as test_pred
 test_truth <- factor(test_truth, levels = levels(test_pred))
