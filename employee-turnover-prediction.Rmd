@@ -24,7 +24,7 @@ Employee turnover is a critical issue for companies, as it can result in signifi
 The dataset we will be using is the [Employee Turnover](https://www.kaggle.com/datasets/davinwijaya/employee-turnover) data set. This data set contains the following information about the employees of a company.
 
 | Column       | Description                                                                                                                                                |
-|-------------------|-----------------------------------------------------|
+|--------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | stag         | Experience (time)                                                                                                                                          |
 | event        | Employee turnover                                                                                                                                          |
 | gender       | Employee's gender, female(f), or male(m)                                                                                                                   |
