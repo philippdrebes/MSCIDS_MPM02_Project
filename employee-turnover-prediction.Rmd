@@ -15,9 +15,15 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction
 
-Welcome to our project on employee turnover prediction! In this project, we will be using various machine learning algorithms to analyze a dataset containing employee turnover data and develop predictive models.
+Our team, consisting of the prospective Data Scientists Philipp Drebes, Albesa Istrefaj and Antonia Durisch, has taken on the topic of employee turnover prediction. 
 
-Employee turnover is a critical issue for companies, as it can result in significant costs such as recruitment, training, and lost productivity. Identifying factors that contribute to employee turnover and developing accurate predictive models can help companies better understand employee behavior and improve employee retention.
+In this project, we will be using various machine learning algorithms to analyze our chosen dataset containing employee turnover data. We will develop predictive models and analyze our results in depth.
+
+Employee turnover is a critical issue for companies, as its results are immense recurring costs in areas such as recruitment, training, and lost productivity.
+
+«Some studies predict that every time a business replaces a salaried employee, it costs 6 to 9 months' salary on average.» (Peoplekeep, 2023)
+
+Our main idea has been to identify factors that contribute to employee turnover, to be able to develop accurate predictive models which help companies better understand employee behavior and improve employee retention.
 
 ## Data set
 
@@ -44,7 +50,7 @@ The dataset we will be using is the [Employee Turnover](https://www.kaggle.com/d
 
 ## Preparation and Exploration
 
-Load the libraries.
+In a first step we are loading all the libraries:
 
 ```{r, message=FALSE, warning=FALSE, results='hide'}
 library(tidyverse, quietly = T)
@@ -62,9 +68,11 @@ library(mlbench, quietly = T)
 library(caret, quietly = T)
 library(arm, quietly = T)
 library(doParallel, quietly = T)
+install.packages("randomForest")
+library(randomForest)
 ```
 
-Load and inspect the data.
+Then we are loading and inspecting our data:
 
 ```{r}
 turnover <- read_csv('data/turnover.csv', col_names=TRUE)
@@ -73,6 +81,91 @@ turnover <- read_csv('data/turnover.csv', col_names=TRUE)
 # Having a look at the structure.
 str(turnover)
 ```
+
+The "stag" column represents the numerical variable of Experience (time) and ranges from 0.39 to 179. 
+
+The numerical column "event" indicates whether an event occurred for each individual. The value 1 suggests that an event took place and 0 that no event took place. Through the numerical notation it is not possible to determine, what kind of event took place. 
+
+The categorical column "gender" represents the gender of each individual. The values "m - 24%" and "f - 67%" indicate male and female, respectively.
+
+The numerical column "age" represents the age of each individual in the age span between 18 and 58 years.
+
+The categorical column "industry" represents the industry in which each individual is employed. The values indicate different industries such as "retail - 26%", "manufacture - 13%", "other - 62%" like "Banks" or "PowerGeneration".
+
+The categorical column "profession" represents the profession of each individual. The values "HR - 67%", "IT - 7%", "other - 26%" provide information about the specific professions within each industry.
+
+The categorical column "traffic" represents from what pipelene the employee came to the company. The values suggest different conditions such as "youjs - 28%", "empjs - 22%," or "other - 50%".
+
+The categorical column "coach" with the values "no - 60%",  "my head - 28%" and "other - 12%" indicates whether each individual has a coach and training or not during probation. 
+
+The categorical column "head_gender" represents the gender of the head of the individual. The values "m - 52%" and "f - 48%" indicate male and female gender.
+
+The categorical column "greywage" indicates with "white - 89%" or "grey - 11%" the wage type for each individual, where the salary does not seem to the tax authorities.
+
+The categorical column "way" represents the way of transportation "bus - 60%", "car - 29%" or "other - 10%" for each individual.
+
+"extraversion", "independ", "selfcontrol", "anxiety", and "novator": These numerical columns represent personality traits of each individual. The values range from low to high, providing information about the individual's level of extraversion, independence, self-control, anxiety, and innovation. Higher values indicate a higher presence of each trait.
+
+Extraversion: 
+25x:1 - 1.9
+29x: 1.9 - 2.8
+84x: 2.8 - 3.7
+293x: 3.7 - 4.6 
+172x: 4.6 - 5.5
+199x: 5.5 - 6.4 
+135x: 6.4 - 7.3
+97x: 7.3 - 8.2
+55x: 8.2 - 9.1
+40x: 9.1 - 10
+
+Independent: 
+26x: 1 - 1.9
+61x: 1.9 - 2.8
+102x: 2.8 - 3.7
+120x: 3.7 - 4.6 
+172x: 4.6 - 5.5
+333x: 5.5 - 6.4 
+142x: 6.4 - 7.3
+102x: 7.3 - 8.2
+38x: 8.2 - 9.1
+33x: 9.1 - 10
+
+Selfcontrol: 
+37x: 1 - 1.9
+76x: 1.9 - 2.8
+92x: 2.8 - 3.7
+156x: 3.7 - 4.6 
+140x: 4.6 - 5.5
+153x: 5.5 - 6.4 
+287x: 6.4 - 7.3
+85x: 7.3 - 8.2
+59x: 8.2 - 9.1
+44x: 9.1 - 10
+
+Anxiety: 
+52x: 1.70 - 2.53
+92x: 2.53 - 3.36
+130x: 3.36 - 4.19
+180x: 4.19 - 5.02
+200x: 5.02 - 5.85 
+173x: 5.85 - 6.68
+129x: 6.68 - 7.51
+87x: 7.51 - 8.34
+58x: 8.34 - 9.17
+28x: 9.17 - 10
+
+Novator: 
+17x: 1 - 1.9
+35x: 1.9 - 2.8
+71x: 2.8 - 3.7
+186x: 3.7 - 4.6 
+165x: 4.6 - 5.5
+168x: 5.5 - 6.4 
+173x: 6.4 - 7.3
+144x: 7.3 - 8.2
+151x: 8.2 - 9.1
+19x: 9.1 - 10
+
 
 ## Exploration
 
@@ -111,8 +204,17 @@ plot(density(turnover$age))
 # violin plot
 vioplot(turnover$age)
 ```
+The interpretation of the data shows immediately, that the turnover rate for young people is much higher than for older individuals. It peaks from 25 - 30 years old, has a very high turnover rate from 20 to 35 years old, and declines steadily from 35 to 60 years old. Also you see, that there are about three times as many female individuals, than male. 
 
 ### One-Hot encoding
+
+In a next step we performed one-hot encoding on the categorical variables in the dataset for several reasons. Firstly, it was necessary to ensure compatibility with our machine learning algorithms which typically require numerical input. By converting categorical variables into binary vectors using one-hot encoding, we could represent the categorical information in a numerical format that could then be processed by these algorithms.
+
+Another crucial reason for employing one-hot encoding was to eliminate any assumptions of ordinality among the categorical variables. Unlike numerical variables, categorical variables often lack a natural order or numerical relationship between their values. By using one-hot encoding, we avoided imposing any ordinality assumptions and created separate binary variables for each category. This approach ensured that the algorithm did not misinterpret any non-existent numerical patterns or relationships.
+
+Furthermore, the one-hot encoding helped us to address the issue of magnitude bias. Since categorical variables have different levels or categories without a natural numerical relationship, assigning arbitrary numerical values to these categories can introduce bias. The one-hot encoding overcame this problem by assigning equal weight to each category, thereby preventing any inherent bias from influencing the analysis.
+
+Through this step we were able to enhance the interpretability of the data. The resulting binary vectors provided clear and interpretable information. Each category within a variable became its own feature, and the presence or absence of a category was represented by 1 or 0. This allowed us easier interpretation of the impact or importance of each category in the analysis.
 
 ```{r}
 dummy <- dummyVars(" ~ .", data=turnover)
@@ -123,7 +225,9 @@ turnover.oh <- data.frame(predict(dummy, newdata=turnover))
 str(turnover.oh)
 ```
 
-We will normalize all scalar values.
+Then in a next step we performed normalization on selected scalar variables in the dataset. Our goal of the normalization has been to rescale the values of these variables to a common scale, between 0 and 1 (or around a mean of 0 with a standard deviation of 1). This process helped us to eliminate the influence of different scales and units, allowing for fairer comparisons and accurate analysis.
+
+The variables selected for normalization were "extraversion," "independ," "selfcontrol," "anxiety," "novator," "age," and "stag.", as these variables represented different attributes of measurements of individuals within the dataset.
 
 ```{r}
 # Normalize selected columns
@@ -131,7 +235,9 @@ columns_to_normalize <- c("extraversion", "independ", "selfcontrol", "anxiety", 
 turnover.oh[columns_to_normalize] <- scale(turnover.oh[columns_to_normalize], center = FALSE, scale = apply(turnover.oh[columns_to_normalize], 2, range)[2, ] - apply(turnover.oh[columns_to_normalize], 2, range)[1, ])
 ```
 
-Next we remove highly correlated variables from our data set, as they might have a negative influence on our models.
+Then we wanted to identify and remove highly correlated variables from our dataset. This, because highly correlated variables will introduce redundancy and multicollinearity issues, negatively affecting the accuracy and interpretability of our models.
+
+To achieve this, we performed the following steps: We computed the correlation matrix to measure the pairwise correlation between variables in the dataset. Then we created a visualization of the correlation matrix to examine the correlation patterns and identify highly correlated variables. Highly correlated variables were determined based on a specified threshold, indicating a strong correlation between two variables. The indices or names of the highly correlated variables were identified and a reduced version of the dataset was created by removing the highly correlated variables. Then a new correlation matrix was generated for the reduced dataset to confirm that the highly correlated variables had been successfully removed. By removing highly correlated variables, our analysis aimed to enhance the quality and reliability of the data, ensuring that the model built upon this dataset would not be influenced by redundant or collinear information.
 
 ```{r}
 correlationMatrix <- cor(turnover.oh)
@@ -150,7 +256,9 @@ turnover.reduced = turnover.oh[,-c(highlyCorrelated)]
 ggcorrplot(cor(turnover.reduced), hc.order = TRUE)
 ```
 
-The data types of some variables need to be modified.
+In our next step the first modification involves converting the variable named event into a factor. This transformation is performed to treat event as a categorical variable, allowing for the distinct categories or groups it represents to be properly recognized and utilized in subsequent analyses.
+
+The second adjustment pertains to the age variable. To ensure uniformity and integrity in the representation of ages, all values within this variable are converted to integers. This conversion ensures that fractional or decimal components are removed, aligning the data type with the discrete nature of age values.
 
 ```{r}
 turnover.reduced$event = as.factor(turnover.reduced$event) # Convert event as factor
@@ -159,22 +267,36 @@ turnover.reduced$age <- as.integer(turnover.reduced$age) # Make sure all ages ar
 
 ## Linear Models
 
-In this chapter, we will be exploring linear models and try to use them to predict the likelihood of an employee leaving the company.
+Next, we will be exploring linear models and try to use them to predict the likelihood of an employee leaving the company.
 
-Our primary research topic is employee turnover, which is recorded by the binomial variable `event` in our data set. Later we will analyze this dependent variable with the use of GLMs, GAMs, SVM and ANN.
+Our primary research topic has been employee turnover, which has been recorded by the binomial variable `event` in our data set. Later we analyzed this dependent variable with the use of GLMs, GAMs, SVM and ANN.
 
-First let's try if we can predict the experience (time) of an employee, given their industry, profession, age and gender. As we expect them to have an effect.
+First we try to predict the experience (time) of an employee, given their industry, profession, age and gender. As we expected them to have an effect.
 
 ```{r}
 fit <- lm(stag ~ industry + profession + age + gender, data = turnover)
 summary(fit)
 ```
 
-We see that we have multiple significant factors in our model. However, only around 11% of the variance is explained by the model. It might not be as useful for further predictions and we would need to gather more data.
+The residuals represent the differences between the predicted and actual values of employee experience (stag). The values range from -63.850 to 135.837, with a median residual of -7.259. These values indicate the model's prediction errors.
+
+The coefficients estimate the impact of each predictor variable on employee experience. For example, the coefficient for the variable industryRealEstate is 45.2553. This suggests that being in the real estate industry is associated with an increase in employee experience by 45.2553 units, compared to the reference category.
+
+The significance codes (***, **, *, etc.) and p-values indicate the statistical significance of each coefficient. For instance, the coefficient for professionCommercial has a p-value of 2.17e-06, denoted by ***. This indicates a highly significant relationship between being in the commercial profession and employee experience.
+
+The residual standard error of 32.51 indicates the average magnitude of the differences between the predicted and observed values of employee experience. A lower value suggests better fit of the model to the data.
+
+The multiple R-squared value of 0.1158 indicates that the predictors included in the model explain approximately 11.58% of the variability in employee experience. The adjusted R-squared value of 0.09082 accounts for the number of predictors and degrees of freedom, suggesting that around 9.08% of the variability is explained while considering the model's complexity.
+
+The F-statistic of 4.635 with a highly small p-value (3.035e-15) indicates that the model, as a whole, is statistically significant. This suggests that the predictors collectively have a significant impact on predicting employee experience.
 
 ### Non-linearities
 
-First we inspect all numerical coefficients for non-linearities.
+In the next step of our analysis, we check the relationships between numerical variables and employee turnover to find potential non-linear patterns. We focus on variables such as age, extraversion, independence, self-control, anxiety, and innovator.
+
+To gain insights, we created scatter plots for each variable, examining how they relate to employee turnover (event). These plots visualized the distribution of data points, illustrating different levels of the numerical variable on the x-axis and the occurrence of turnover on the y-axis.
+
+To further investigate non-linear trends, we added to the scatter plots smoothed lines. These lines provided estimates of the underlying relationships between the variables and turnover, enabling us to identify possible non-linear associations.
 
 ```{r}
 ## Age
@@ -216,11 +338,11 @@ plot.innovator <- gg.innovator + geom_smooth()
 grid.arrange(plot.age, plot.extraversion, gg.independence, plot.selfcontrol, plot.anxiety, plot.innovator, ncol=2)
 ```
 
-It appears that only the factor age has a non-linear behavior. We will use a GAM to find its complexity.
+It appears that only the factor age has a big non-linear behavior, where as anxiety and selfcontrol have a minimal non-linear behavior. We will use a GAM to find its complexity.
 
 #### Training the model
 
-Performing feature selection before training a model can be a good practice to improve model performance and reduce overfitting. Here we use recursive feature elimination (RFE) before training the model. We will again use only the one-hot encoded data set with correlating features included, as we expect the feature selection process to take care of it.
+Performing feature selection before training a model is a good practice to improve model performance and reduce overfitting. Here we used recursive feature elimination (RFE) before training the model. We will again use only the one-hot encoded data set with correlating features included, as we expect the feature selection process to take care of it.
 
 ```{r}
 set.seed(12)
@@ -261,7 +383,7 @@ selected_features <- names(turnover.reduced[, -2])[rfe_result$optVariables]
 print(selected_features)
 ```
 
-No features where selected. Therefore, we will use again the `turnover.reduced` data set. We will try a different approach.
+We used feature selection using recursive feature elimination (RFE) before training our model. It begun by setting the seed for reproducibility. The control parameters for the RFE process were defined, specifying the use of "rfFuncs" functions and cross-validation with 10 folds. A formula has been defined for the GAM model, including the smooth term for "age" with a truncated power basis. Subset sizes and a tuning grid for the feature selection process also have been specified. Parallel processing has been enabled using 8 cores. The feature selection algorithm has been run using RFE, taking the one-hot encoded dataset as predictors and the "event" column as the dependent variable. After the process, the parallel processing has been stopped, and the environment has been cleaned up. No features where selected. Therefore, we will use again the `turnover.reduced` data set. We will try a different approach.
 
 ```{r}
 # ensure results are repeatable
@@ -294,11 +416,15 @@ plot(model.gam, residuals = TRUE)
 AIC(model.gam$finalModel)
 ```
 
-Still not a good fit, with only around 12% of the variance explained by the model. Also we see, that the feature selection only has a slight, almost negligible, impact on accuracy.
+The model is fitted using a binomial family, indicating that the outcome variable is binary (e.g., 0/1, success/failure). The link function used is the logit, which is appropriate for modeling binary outcomes. The formula used for the model specifies the relationship between the outcome variable (".outcome") and the predictor variables. Each predictor variable is listed with a plus sign (+) before it. The parametric coefficient section provides the estimated coefficients, standard errors, z-values, and p-values for the predictor variables included in the model. These coefficients represent the linear effects of each predictor on the log-odds of the outcome variable. The Intercept represents the estimated log-odds when all the predictor variables are zero. The z-value and p-value indicate the statistical significance of each coefficient. The approximate significance of smooth terms section provides the approximate significance of the smooth terms included in the model. The "edf" represents the effective degrees of freedom for each smooth term. The "Chi.sq" value is the chi-square statistic associated with each smooth term, and the p-value indicates its statistical significance. The adjusted R-squared value (R-sq.(adj)) represents the proportion of the variance in the outcome variable explained by the model. The Deviance explained represents the percentage of deviance in the outcome variable explained by the model. UBRE (Unbiased Risk Estimate) is an estimation of the expected prediction error. Scale est. represents the estimated dispersion parameter of the binomial distribution. n represents the number of observations used in the model.
+
+Still not a good fit, with only around 10.1% of the variation and about 9.89% of the deviance in the outcome explained. Also we see, that the feature selection only has a slight, almost negligible, impact on accuracy.
 
 ### Generalized Linear Models
 
 Next we fit a generalized linear model in order to predict employee turnover.
+
+We see that the null deviance is 1565.0, and it is calculated on 1128 degrees of freedom. The residual deviance is 1394.2, and it is calculated on 1078 degrees of freedom. The Akaike Information Criterion (AIC) is a measure of model fit that takes into account both the goodness of fit and the complexity of the model. We used it for model comparison, where a lower AIC indicates a better fit. In this case, our AIC is 1496.2. The algorithm required 14 iterations to converge and obtain the final estimates for the logistic regression model. 
 
 ```{r}
 # ensure results are repeatable
@@ -329,7 +455,7 @@ plot(importance)
 summary(model.glm)
 ```
 
-We also want to try to predict an employees age by their amount of experience and multiple other factors.
+We also wanted to try to predict an employees age by their amount of experience and multiple other factors. We took the Poisson regression model and fitted it to the 'age' variable using the glm() function. 
 
 ```{r}
 glm.age <- glm(age ~ ., data = turnover.reduced, family = "poisson")
@@ -363,9 +489,15 @@ plot(importance)
 summary(model.glm)
 ```
 
+Our deviance residuals ranged from -1.3870 to 2.4394, indicating some variability between the observed and predicted values. Positive residuals indicated that the predicted age is higher than the observed age, while negative residuals indicated that the predicted age has been lower than the observed age. The first quartile (1Q) has been -0.4718, the median has been -0.3178, and the third quartile (3Q) has been -0.1741. These values suggested that the model has some variability in its fit to the data, but the median residual is closer to zero, indicating a reasonably good fit.
+
 ## Support Vector Machines
 
-In this chapter, we will be use Support Vector Machines (SVM) in order to predict employee turnover.
+Now we have been using Support Vector Machines (SVM) to predict the employee turnover.
+
+In the first step, we set a random seed to ensure reproducibility of the results. Next, we create data partitions using the createDataPartition() function. We specify that we want to partition the data based on the "event" variable from the "turnover.reduced" dataset, and we set the proportion of the data to be included in the training set as 85%. The list = F argument indicates that we want to obtain a vector of indices rather than a list of partitioned data. We then create the training set by subsetting the "turnover.reduced" dataset using the indices obtained from the data partition. This ensures that the training set contains 85% of the data. The remaining data is used to create the test set. We subset the "turnover.reduced" dataset using the negative indices (i.e., excluding the indices used for the training set), and we remove the "event" variable from the test set using the dplyr::select() function. We also create a separate vector called "test_truth" that contains the actual "event" values for the observations in the test set. This will be used later for evaluating the model's performance.
+
+In the end, we have divided the data into a training set (85% of the data) and a test set (15% of the data) for the purpose of training and evaluating the SVM model to predict employee turnover.
 
 ```{r}
 set.seed(123)
@@ -381,7 +513,13 @@ test_truth <- turnover.reduced %>%
   pull(event)
 ```
 
-### Train the Neural Network
+#### Train the SVM
+
+In this chapter, the objective is to build and evaluate a support vector machine (SVM) model for predicting employee turnover. A specific seed value of 100 is set using set.seed(100). This ensures that the random number generation process produces the same results every time the code is executed, promoting reproducibility. Then, the tune() function is employed to tune the parameters of the SVM model. The specific goal is to tune the cost parameter for a linear SVM model with C-classification. The tuning is conducted on the training data (train), and a range of values is specified for the cost parameter using the ranges argument. The tune() function outputs the best-tuned model based on the specified parameter ranges. This best-tuned model is assigned to the variable svm.linear using the line svm.linear <- tune.out$best.model. This model is later used for predictions.
+
+To evaluate the performance of the model, our predictions were made on the testing data (test_in) using the best-tuned SVM model. The predict() function has been used to generate these predictions, and the predicted values were stored in the test_pred variable. To facilitate accurate evaluation, the test_truth variable, which contained the actual event values for the observations in the test set, were converted to a factor with the same levels as the predicted values (test_pred). This ensured that the predicted and actual values had the same levels, enabling proper comparison.
+
+Finally, the confusionMatrix() function has been employed to calculate various performance metrics, such as accuracy, precision, recall, and the F1 score. It compared the predicted values (test_pred) with the actual values (test_truth) and generated a confusion matrix. The resulting confusion matrix is stored in the conf_matrix variable, providing a comprehensive evaluation of the SVM model's performance.
 
 ```{r}
 set.seed(100)
@@ -406,7 +544,9 @@ conf_matrix <- confusionMatrix(test_pred, test_truth)
 conf_matrix
 ```
 
-Now we will use the `tune` function again and also try different kernels for the SVM algorithm.
+The confusion matrix and statistics provide an assessment of the performance of the SVM model. The confusion matrix shows the counts of true positive 58x, false positive 37x, false negative 25x, and true negative 48x predictions. The accuracy of the model is calculated to be 0.631, indicating that it correctly predicts the outcome in approximately 63.1% of cases. The 95% confidence interval for the accuracy is estimated to be between 0.5532 and 0.704. Comparing the model's performance to the no-information rate (NIR), which represents the accuracy of a naive model that always predicts the majority class, the p-value is determined to be 0.0007345. This suggests that the SVM model significantly outperforms the naive approach. The kappa coefficient, a measure of agreement beyond chance, is computed to be 0.2631. This indicates only a fair level of agreement between the predicted and actual outcomes. Mcnemar's test is conducted to evaluate if there is a significant difference in the number of errors made by the model for different classes. The resulting p-value is 0.1624132, suggesting no significant difference in error rates between the classes. Analyzing the sensitivity and specificity of the model, the sensitivity (true positive rate) is calculated to be 0.6988, indicating the model's ability to correctly identify the positive class. The specificity (true negative rate) is determined to be 0.5647, reflecting the model's ability to correctly identify the negative class. The positive predictive value, which represents the proportion of positive predictions that are correct, is calculated to be 0.6105. The negative predictive value, representing the proportion of negative predictions that are correct, is 0.6575. The prevalence of the positive class in the dataset is 0.4940. The detection rate, which is the proportion of actual positive cases that are correctly predicted, is found to be 0.3452. The detection prevalence, which represents the proportion of predicted positive cases, is 0.5655.
+
+Overall, the balanced accuracy of the model, calculated as the average of sensitivity and specificity, is 0.6318. Now we will use the `tune` function again and also try different kernels for the SVM algorithm.
 
 ```{r}
 set.seed(99)
@@ -429,12 +569,176 @@ test_truth <- factor(test_truth, levels = levels(test_pred))
 conf_matrix <- confusionMatrix(test_pred, test_truth)
 conf_matrix
 ```
+After using the `tune` function again and also trying different kernels for the SVM algorithm, we received the following values: 
 
-### Conclusion
+•	46 instances -> predicted as 0 and actually belong to class 0
+•	28 instances -> predicted as 0 but actually belong to class 1
+•	37 instances -> predicted as 1 but actually belong to class 0
+•	57 instances -> predicted as 1 and actually belong to class 1
+
+The accuracy has been calculated as 0.6131, which means that the model correctly predicted the outcome for approximately 61.31% of the instances. Based on these metrics, we could observe that the performance in terms of accuracy, sensitivity, specificity, and negative predictive value is slightly worse in the current input compared to the previous input. However, the positive predictive value is slightly better with 62.16% in the current input.
 
 ## Artificial Neural Networks
 
 In this chapter, we will be exploring Artificial Neural Networks (ANN). ANN is a machine learning algorithm inspired by the biological structure of the human brain. We will explain how ANN works, how to train an ANN model, and how to use it to predict employee turnover.
+
+```{r}
+install.packages("neuralnet")
+install.packages("mlr3")
+install.packages("mlr3misc")
+install.packages("caret")
+#library(keras)
+#library(mlr3)
+#library(mlr3misc)
+#library(caret)
+library(neuralnet)
+library(lattice)
+library(caTools)  # For data splitting
+library(nnet)
+
+# Read the CSV file into a data frame
+turnover <- read.csv("turnover.csv")
+```
+
+In a first step we want to examine the structure of our data frame 'turnover', to receive information about the variables included, their data types and to see a short previe of the data. We determine the dimensions of our data frame, to receive an idea of its size (rows and colums). Last but not least, our goal is to identify missing values. 
+
+```{r}
+# Data overview 
+
+# View the structure of the data frame
+str(turnover)
+
+# Get the dimensions of the data frame (number of rows and columns)
+dim(turnover)
+
+# Check for missing values
+sum(is.na(turnover))
+```
+
+We convert in a first step categorical variables like "gender", "industry", "profession", "traffic", "coach", "head_gender", "greywage", and "way" to factors. Next we want to ensure reproducibilty, why we set the seed value to 42. We split then our dataset into training and testing sets. We do the split based on the "event" column, where we assign 70% to the training and the remaining 30% to the testing set. This division enables model training on the training set and evaluation on the unseen testing set.  The numeric variables in both the training and testing sets, including "stag," "age," "extraversion," "independ," "selfcontrol," "anxiety," and "novator," are being normalized. This normalization process rescales the values of these variables to a common scale, between 0 and 1. 
+
+```{r}
+# Data Preprocessing
+
+# Convert categorical variables to factors
+turnover$gender <- as.factor(turnover$gender)
+turnover$industry <- as.factor(turnover$industry)
+turnover$profession <- as.factor(turnover$profession)
+turnover$traffic <- as.factor(turnover$traffic)
+turnover$coach <- as.factor(turnover$coach)
+turnover$head_gender <- as.factor(turnover$head_gender)
+turnover$greywage <- as.factor(turnover$greywage)
+turnover$way <- as.factor(turnover$way)
+
+# Set seed for reproducibility
+set.seed(42)
+
+# Split the dataset into training and testing sets (70% training, 30% testing)
+split <- sample.split(turnover$event, SplitRatio = 0.7)
+train_data <- subset(turnover, split == TRUE)
+test_data <- subset(turnover, split == FALSE)
+
+# Normalize numeric variables in the training and testing sets
+train_data[, c("stag", "age", "extraversion", "independ", "selfcontrol", "anxiety", "novator")] <- scale(train_data[, c("stag", "age", "extraversion", "independ", "selfcontrol", "anxiety", "novator")])
+test_data[, c("stag", "age", "extraversion", "independ", "selfcontrol", "anxiety", "novator")] <- scale(test_data[, c("stag", "age", "extraversion", "independ", "selfcontrol", "anxiety", "novator")])
+```
+
+Our next code block, where we build the ANN model, starts again with setting the seed to 42.We do this to ensure that any random processes involved in subsequent steps produce the same results when the code is run again. Then we need to specify the relationsship between the target variable "event" and the predictor variables in the data, which is why we need to define a formula for this, but we exclude "stag" from it. Next we want to treat the target variable as a categorical variable with distinct levels, so we convert the "event" variable in both, training and testing set, to a factor. Now we finally can build our ANN model, where it takes in the defined formula, the training data, and other parameters such as the number of neurons in the hidden layer, maximum number of iterations, weight decay parameter, and activation function for the output layer. Tracing has been disabled to reduce output verbosity. Our trained ANN model is then used to make predictions on the test data. Last but not least, we need to calculate the accuracy of the predictions, by comparing our predicted values with actual values in the test data.
+
+```{r}
+# Build the ANN Model
+
+# Set the random seed for reproducibility
+set.seed(42)
+
+# Define the formula for the model
+formula <- event ~ . - stag
+
+# Convert the target variable to a factor
+train_data$event <- as.factor(train_data$event)
+test_data$event <- as.factor(test_data$event)
+
+# Build the ANN model
+ann_model <- nnet(
+  formula,
+  data = train_data,
+  size = 10,  # Specify the number of neurons in the hidden layer
+  maxit = 2000,  # Maximum number of iterations
+  decay = 0.01,  # Weight decay parameter
+  linout = FALSE,  # Use a non-linear activation function for the output layer
+  trace = FALSE  # Disable tracing to reduce output
+)
+
+# Make predictions on the test data
+predicted_values <- predict(ann_model, newdata = test_data, type = "class")
+
+# Calculate accuracy
+accuracy <- sum(predicted_values == test_data$event) / nrow(test_data)
+cat("Accuracy: ", accuracy, "\n")
+```
+
+Next we create a data frame where we show the predicted and actual values. We then count the occurences of each unique combination of predicted and actual values in the "prediction_data" data frame. This creates a table that shows the frequency of each combination. Lastly, we create a bar plot, to be able to visualize the comparison between the predicted and acutal values.  
+
+```{r}
+# Create a data frame with predicted and actual values
+prediction_data <- data.frame(Predicted = predicted_values, Actual = test_data$event)
+
+# Count the occurrences of each combination of predicted and actual values
+prediction_counts <- table(prediction_data$Predicted, prediction_data$Actual)
+
+# Plot the bar plot
+barplot(prediction_counts, beside = TRUE, legend = TRUE,
+        main = "Predicted vs Actual", xlab = "Employee Turnover",
+        ylab = "Count", col = c("blue", "green"), names.arg = c("Retained", "Left"))
+```
+
+The employee turnover is represented by the 'event' variable, where the accuracy of our model is 0.6242604, which means the model correctly predicted the employee turnover status for approximately 62.42% of the cases in the test data. However, accuracy alone is not providing a complete picture of the model's performance, especially in imbalanced datasets where the number of employees who leave the company (churn) is much smaller than those who stay (non-churn). 
+
+
+### Conclusion
+We started with the initial exploratory analysis of our dataset, where a first trend showed that fluctuation tends to be higher when an individual is younger by age. 
+
+The variables "extraversion," "independ," "selfcontrol," "anxiety," "novator," "age," and "stag" were specifically selected for normalization in the One-Hot encoding chapter, due to the variables which represented different attributes of measurements. 
+
+The Analysis through the linear model showed that the significance level with three stars, where it is indicated that there is a high level of statistical significance, has been found in "age", "professionSales", "professionMarketing", "professionmanage", "professionIT", "professionHR", "professionetc", "professionEngineer", "professionConsult", "professionCommercial", "professionBusinessDevelopment" and "industryRealEstate". A moderate level of statistical significance is shown in the significance level with two stars, where the categories "industryPharma", "industryRetail", "industryTelecom" and "professionPR" belong to. Last but not least a lower level of statistical significance is shown in "professionTeaching", "professionLaw", "professionFinance", "industrymanufacture" and "industryBuilding". Multiple R-Squared shows that approximately 11.58% of the variation in the dependent variable is explained by the independent variables. The F-statistic has 31 and 1097 degrees of freedom, where as a larger F-statistic suggests a better overall fit of the model. 
+
+Next we checked for non-linearity, where it appears that only the factor age has a big non-linear behavior, where as anxiety and selfcontrol have a minimal indicator for non-linear behavior. 
+
+Afterwards we startet with the training of the model. Therefore we used feature selection using recursive feature elimination (RFE) before training the model. As learned in class we have set the seed for reproducibility, defined control parameters and specified functions, and performed cross-validation with 10 folds. But no features have been selected during the whole process, so we had to try another approach. 
+
+In the new approach, the model has been fitted using a binomial family, with "industryIT", “professionHR” as highly significant and "industryBanks",  “professionIT”, “trafficreferal”, “wayfootas” significant. The R-squared adjusted value is indicating the proportion of variance in the outcome variable that is explained by the model. In our case, the adjusted R-squared is 0.101, suggesting that the model explains approximately 10.1% of the variance in the outcome. Whereas the deviance explained is 9.89%, indicating the proportion of deviance in the outcome variable that is accounted for by the model. 
+
+As this has been still not a good fit, we fit a generalized linear model. There the note "3 not defined because of singularities" suggested that three coefficients were not estimated due to singularities. This means that linear dependencies or perfect multicollinearity among the predictor variables exists, making it impossible to estimate the individual effects of those variables. There were several values with significance codes of two stars: “industryBanks”, “industryBuilding”, “industryConsult”, “trafficrabrecNErab”, “trafficreferal”, “wayfoot”, as well as two with only one star: “stag” and “trafficempjs”. Then next we wanted to predict an employees age by their amount of experience, so we used the poisson regression model. 
+
+It was fitted using the glm() function. Our deviance residuals ranged from -1.3870 to 2.4394, indicating some variability between the observed and predicted values. Positive residuals indicated that the predicted age is higher than the observed age, while negative residuals indicated that the predicted age has been lower than the observed age. The first quartile (1Q) has been -0.4718, the median has been -0.3178, and the third quartile (3Q) has been -0.1741. These values suggested that the model has some variability in its fit to the data, but the median residual is closer to zero, indicating a reasonably good fit.
+
+In the support vector machine chapter, we received the following output: The confusion matrix represents the counts of the predicted and actual values, where we received the following values: 
+
+•	58 instances -> predicted as 0 and actually belong to class 0
+•	37 instances -> predicted as 0 but actually belong to class 1
+•	25 instances -> predicted as 1 but actually belong to class 0
+•	48 instances -> predicted as 1 and actually belong to class 1
+
+The model correctly predicted the outcome for approximately 63.1% of the instances. In this case, the 95% confidence interval for the accuracy is estimated to be between 0.5532 and 0.704, which means that the true accuracy of the model is likely to fall in this range. The no information rate represents the accuracy achieved by predicting the most frequent class in the dataset. In this case, the no information rate is 0.506, indicating that if the model simply predicted the most frequent class for all instances, it would have achieved an accuracy of 50.6%. The p-value is 0.0007345, which is less than the typical significance level of 0.05. Therefore, the model's accuracy is considered significantly better than the accuracy achieved by simply predicting the most frequent class. The kappa value in this case is 0.2631, indicating a fair level of agreement between the predictions and the actual values. The p-value for McNemar's test is 0.1624132, which is above the typical significance level of 0.05. This suggests that there is no significant difference in the errors made by the model between the two classes. Sensitivity, also known as true positive rate or recall, measures the proportion of actual positive instances that are correctly identified as positive by the model. In this case, the sensitivity is calculated as 0.6988, indicating that the model correctly identifies 69.88% of the instances belonging to class 1. Specificity measures the proportion of actual negative instances that are correctly identified as negative by the model. In this case, the specificity is calculated as 0.5647, indicating that the model correctly identifies 56.47% of the instances belonging to class 0. The positive predictive value is calculated as 0.6105, indicating that approximately 61.05% of the instances predicted as positive are true positives. The negative predictive value is calculated as 0.6575, indicating that approximately 65.75% of the instances predicted as negative are true negatives. The prevalence is calculated as 0.4940, indicating that approximately 49.40% of the instances belong to the positive class. The detection rate is calculated as 0.3452, indicating that approximately 34.52% of the positive instances are correctly detected by the model. The detection prevalence is calculated as 0.5655, indicating that approximately 56.55% of the instances are predicted as positive by the model. The balanced accuracy is the average of sensitivity and specificity. It provides an overall measure of how well the model performs for both the positive and negative classes. In this case, the balanced accuracy is calculated as 0.6318, indicating a moderate level of accuracy considering both classes.
+
+After using the `tune` function again and also trying different kernels for the SVM algorithm, we received the following values: 
+
+•	46 instances -> predicted as 0 and actually belong to class 0
+•	28 instances -> predicted as 0 but actually belong to class 1
+•	37 instances -> predicted as 1 but actually belong to class 0
+•	57 instances -> predicted as 1 and actually belong to class 1
+
+The accuracy has been calculated as 0.6131, which means that the model correctly predicted the outcome for approximately 61.31% of the instances. Based on these metrics, we could observe that the performance in terms of accuracy, sensitivity, specificity, and negative predictive value is slightly worse in the current input compared to the previous input. However, the positive predictive value is slightly better with 62.16% in the current input.
+
+#### Final Words
+It has been interesting for our group to try those concepts in a practical approach, once we have learned them in class. Now we understand them not only in theory, but also in an applied way. 
+
+
+# Quotes
+
+(Peoplekeep, 2023)
+
+https://www.peoplekeep.com/blog/employee-retention-the-real-cost-of-losing-an-employee#:~:text=Some%20studies4%20predict%20that,and%20role%20of%20the%20employee.
 
 ```{r}
 
