@@ -216,7 +216,7 @@ turnover.reduced$age <- as.integer(turnover.reduced$age) # Make sure all ages ar
 
 ## Linear Models
 
-Next, we explored linear models and tried to use them to predict the likelihood of an employee leaving the company.
+Next, we explored linear models and tried to use them to predict the likelihood of an employee leaving the company. Philipp Drebes took the lead on this Linear Model section.
 
 Our primary research topic has been employee turnover, which has been recorded by the binomial variable `event` in our data set. Later we analyzed this dependent variable with the use of GLMs, GAMs, SVM and ANN.
 
@@ -442,7 +442,7 @@ Our deviance residuals ranged from -1.3870 to 2.4394, indicating some variabilit
 
 ## Support Vector Machines
 
-Next we have been using Support Vector Machines (SVM) to predict the employee turnover.
+Next we have been using Support Vector Machines (SVM) to predict the employee turnover. Antonia Durisch took the lead on the Support Vector Machine section.
 
 We started with setting a random seed to ensure reproducibility of the results. Next, we created data partitions using the createDataPartition() function. We specifyed that we want to partition the data based on the "event" variable from the "turnover.reduced" dataset, and we set the proportion of the data to be included in the training set as 85%. The list = F argument indicated that we wanted to obtain a vector of indices rather than a list of partitioned data. We then created the training set by subsetting the "turnover.reduced" dataset using the indices obtained from the data partition. This ensured that the training set contained 85% of the data. The remaining data has been used to create the test set. We subset the "turnover.reduced" dataset using the negative indices (i.e., excluding the indices used for the training set), and we removed the "event" variable from the test set using the dplyr::select() function. We also created a separate vector called "test_truth" that contains the actual "event" values for the observations in the test set. We used this later for evaluating our model's performance.
 
@@ -493,7 +493,7 @@ conf_matrix <- confusionMatrix(test_pred, test_truth)
 conf_matrix
 ```
 
-The confusion matrix and statistics provided an assessment of the performance of the SVM model. The confusion matrix showed the counts of true positive 58x, false positive 37x, false negative 25x, and true negative 48x predictions. The accuracy of the model was calculated to be 0.631, indicating that it correctly predicted the outcome in approximately 63.1% of cases. The 95% confidence interval for the accuracy was estimated to be between 0.5532 and 0.704. Comparing the model's performance to the no-information rate, which represents the accuracy of a naive model that always predicts the majority class, the p-value has been determined to be 0.0007345. This suggested that the SVM model significantly outperformed the naive approach. The kappa coefficient, a measure of agreement beyond chance, was computed to be 0.2631. This indicated to us that only a fair level of agreement between the predicted and actual outcomes. Mcnemar's test has been conducted to evaluate if there has been a significant difference in the number of errors made by the model for different classes. The resulting p-value was 0.1624132, suggesting no significant difference in error rates between the classes. When we started analyzing the sensitivity and specificity of our model, the sensitivity -> true positive rate, was calculated to be 0.6988, indicating the model's ability to correctly identify the positive class. The specificity -> true negative rate, was determined to be 0.5647, reflecting our model's ability to correctly identify the negative class. The positive predictive value, which represented the proportion of positive predictions that were correct, was calculated to be 0.6105. And the negative predictive value, representing the proportion of negative predictions that are correct, was 0.6575. The prevalence of the positive class in the dataset has been 0.4940. The detection rate, which was the proportion of actual positive cases that were correctly predicted, has been found to be 0.3452. And last but not least, the detection prevalence, which represented the proportion of predicted positive cases, has been 0.5655.
+The confusion matrix and statistics provided an assessment of the performance of the SVM model. The confusion matrix showed the counts of true positive 58x, false positive 37x, false negative 25x, and true negative 48x predictions. The accuracy of the model was calculated to be 0.631, indicating that it correctly predicted the outcome in approximately 63.1% of cases. The 95% confidence interval for the accuracy was estimated to be between 0.5532 and 0.704. Comparing the model's performance to the no-information rate, which represents the accuracy of a naive model that always predicts the majority class, the p-value has been determined to be 0.0007345. This suggested that the SVM model significantly outperformed the naive approach. The kappa coefficient, a measure of agreement beyond chance, was computed to be 0.2631. This indicated to us that only a fair level of agreement between the predicted and actual outcomes. Mcnemar's test has been conducted to evaluate if there has been a significant difference in the number of errors made by the model for different classes. The resulting p-value was 0.1624132, suggesting no significant difference in error rates between the classes. When we started analyzing the sensitivity and specificity of our model, the sensitivity -\> true positive rate, was calculated to be 0.6988, indicating the model's ability to correctly identify the positive class. The specificity -\> true negative rate, was determined to be 0.5647, reflecting our model's ability to correctly identify the negative class. The positive predictive value, which represented the proportion of positive predictions that were correct, was calculated to be 0.6105. And the negative predictive value, representing the proportion of negative predictions that are correct, was 0.6575. The prevalence of the positive class in the dataset has been 0.4940. The detection rate, which was the proportion of actual positive cases that were correctly predicted, has been found to be 0.3452. And last but not least, the detection prevalence, which represented the proportion of predicted positive cases, has been 0.5655.
 
 Overall, the balanced accuracy of the model, calculated as the average of sensitivity and specificity, was 0.6318. Next we used the `tune` function again and we also tryed different kernels for the SVM algorithm.
 
@@ -521,16 +521,13 @@ conf_matrix
 
 After using the `tune` function again and also trying different kernels for the SVM algorithm, we received the following values:
 
-• 46 instances -> predicted as 0 and actually belong to class 0 
-• 28 instances -> predicted as 0 but actually belong to class 1 
-• 37 instances -> predicted as 1 but actually belong to class 0 
-• 57 instances -> predicted as 1 and actually belong to class 1
+• 46 instances -\> predicted as 0 and actually belong to class 0 • 28 instances -\> predicted as 0 but actually belong to class 1 • 37 instances -\> predicted as 1 but actually belong to class 0 • 57 instances -\> predicted as 1 and actually belong to class 1
 
 The accuracy has been calculated as 0.6131, which meaned that the model correctly predicted the outcome for approximately 61.31% of the instances. Based on these metrics, we could observe that the performance in terms of accuracy, sensitivity, specificity, and negative predictive value is slightly worse in the current input, so after using the tune function again, compared to the previous input. However, the positive predictive value is slightly better with 62.16% in the current input.
 
 ## Artificial Neural Networks
 
-In this chapter, we explored Artificial Neural Networks (ANN). ANN is a machine learning algorithm inspired by the biological structure of the human brain. We will explain how ANN work, how to train an ANN model, and how to use it to predict employee turnover.
+In this chapter, we explored Artificial Neural Networks (ANN). ANN is a machine learning algorithm inspired by the biological structure of the human brain. We will use it to predict employee turnover. Albesa Istrefaj took the lead on the Artificial Neural Networks section.
 
 ```{r}
 #library(keras)
@@ -546,7 +543,7 @@ library(nnet)
 turnover <- read.csv("data/turnover.csv")
 ```
 
-In a first step we wanted to examine the structure of our data frame 'turnover', to receive information about the variables included, their data types and to see a short preview of the data. We determined the dimensions of our data frame, to receive an idea of its size -> rows and colums. Last but not least, our goal has been to identify missing values.
+In a first step we wanted to examine the structure of our data frame 'turnover', to receive information about the variables included, their data types and to see a short preview of the data. We determined the dimensions of our data frame, to receive an idea of its size -\> rows and colums. Last but not least, our goal has been to identify missing values.
 
 ```{r}
 # Data overview 
@@ -638,7 +635,7 @@ barplot(prediction_counts, beside = TRUE, legend = TRUE,
         ylab = "Count", col = c("blue", "green"), names.arg = c("Retained", "Left"))
 ```
 
-The employee turnover has been represented by the 'event' variable, where the accuracy of our model has been 0.6242604, which meant that the model correctly predicted the employee turnover status for approximately 62.42% of the cases in the test data. However, accuracy alone has not been providing a complete picture of the model's performance, especially in imbalanced datasets where the number of employees who leave the company -> churn, is much smaller than those who stay -> non-churn.
+The employee turnover has been represented by the 'event' variable, where the accuracy of our model has been 0.6242604, which meant that the model correctly predicted the employee turnover status for approximately 62.42% of the cases in the test data. However, accuracy alone has not been providing a complete picture of the model's performance, especially in imbalanced datasets where the number of employees who leave the company -\> churn, is much smaller than those who stay -\> non-churn.
 
 ## Conclusion
 
@@ -654,25 +651,19 @@ Afterwards we startet with the training of the model. Therefore we used feature 
 
 In the new approach, the model has been fitted using a binomial family, with "industryIT", "professionHR" as highly significant and "industryBanks", "professionIT", "trafficreferal", "wayfootas" as significant. The R-squared adjusted value has been indicating the proportion of variance in the outcome variable that has been explained by the model. In our case, the adjusted R-squared was 0.101, suggesting that the model explained approximately 10.1% of the variance in the outcome. Whereas the deviance explained was 9.89%, indicating the proportion of deviance in the outcome variable that has been accounted for by the model.
 
-As this has been still not a good fit, we fit a generalized linear model. There the note "3 not defined because of singularities" suggested that three coefficients were not estimated due to singularities. This meant that linear dependencies or perfect multicollinearity among the predictor variables existed, making it impossible to estimate the individual effects of those variables. There were several values with significance codes of two stars: "industryBanks", "industryBuilding", "industryConsult", "trafficrabrecNErab", "trafficreferal", "wayfoot", as well as two with only one star: "stag" and "trafficempjs". 
+As this has been still not a good fit, we fit a generalized linear model. There the note "3 not defined because of singularities" suggested that three coefficients were not estimated due to singularities. This meant that linear dependencies or perfect multicollinearity among the predictor variables existed, making it impossible to estimate the individual effects of those variables. There were several values with significance codes of two stars: "industryBanks", "industryBuilding", "industryConsult", "trafficrabrecNErab", "trafficreferal", "wayfoot", as well as two with only one star: "stag" and "trafficempjs".
 
 Then next we wanted to predict an employees age by their amount of experience, so we used the poisson regression model.It was fitted using the glm() function. Our deviance residuals ranged from -1.3870 to 2.4394, indicating some variability between the observed and predicted values. Positive residuals indicated that the predicted age has been higher than the observed age, while negative residuals indicated that the predicted age has been lower than the observed age. The first quartile (1Q) was -0.4718, the median was -0.3178, and the third quartile (3Q) was -0.1741. These values suggested that the model had some variability in its fit to the data, but the median residual was closer to zero, indicating a reasonably good fit.
 
 In the support vector machine chapter, we received the following output: The confusion matrix represented the counts of the predicted and actual values, where we received the following values:
 
-• 58 instances -> predicted as 0 and actually belong to class 0 
-• 37 instances -> predicted as 0 but actually belong to class 1 
-• 25 instances -> predicted as 1 but actually belong to class 0 
-• 48 instances -> predicted as 1 and actually belong to class 1
+• 58 instances -\> predicted as 0 and actually belong to class 0 • 37 instances -\> predicted as 0 but actually belong to class 1 • 25 instances -\> predicted as 1 but actually belong to class 0 • 48 instances -\> predicted as 1 and actually belong to class 1
 
 The model correctly predicted the outcome for approximately 63.1% of the instances. In this case, the 95% confidence interval for the accuracy was estimated to be between 0.5532 and 0.704, which meant that the true accuracy of the model was likely to fall in this range. The no information rate represented the accuracy achieved by predicting the most frequent class in the dataset. In this case, the no information rate was 0.506, indicating that if the model simply predicted the most frequent class for all instances, it would have achieved an accuracy of 50.6%. The p-value was 0.0007345, which was less than the typical significance level of 0.05. Therefore, the model's accuracy was considered significantly better than the accuracy achieved by simply predicting the most frequent class. The kappa value in this case was 0.2631, indicating a fair level of agreement between the predictions and the actual values. The p-value for McNemar's test was 0.1624132, which has been above the typical significance level of 0.05. This suggested that there has been no significant difference in the errors made by the model between the two classes. Sensitivity, also known as true positive rate or recall, measured the proportion of actual positive instances that were correctly identified as positive by the model. In this case, the sensitivity has been calculated as 0.6988, indicating that the model correctly identified 69.88% of the instances belonging to class 1. Specificity measured the proportion of actual negative instances that were correctly identified as negative by the model. In this case, the specificity was calculated as 0.5647, indicating that the model correctly identified 56.47% of the instances belonging to class 0. The positive predictive value was calculated as 0.6105, indicating that approximately 61.05% of the instances predicted as positive were true positives. The negative predictive value has been calculated as 0.6575, indicating that approximately 65.75% of the instances predicted as negative were true negatives. The prevalence was calculated as 0.4940, indicating that approximately 49.40% of the instances belonged to the positive class. The detection rate was calculated as 0.3452, indicating that approximately 34.52% of the positive instances were correctly detected by the model. The detection prevalence was calculated as 0.5655, indicating that approximately 56.55% of the instances were predicted as positive by the model. The balanced accuracy has been the average of sensitivity and specificity. It provided an overall measure of how well the model performed for both the positive and negative classes. In this case, the balanced accuracy has been calculated as 0.6318, indicating a moderate level of accuracy considering both classes.
 
 After using the `tune` function again and also trying different kernels for the SVM algorithm, we received the following values:
 
-• 46 instances -> predicted as 0 and actually belong to class 0 
-• 28 instances -> predicted as 0 but actually belong to class 1 
-• 37 instances -> predicted as 1 but actually belong to class 0 
-• 57 instances -> predicted as 1 and actually belong to class 1
+• 46 instances -\> predicted as 0 and actually belong to class 0 • 28 instances -\> predicted as 0 but actually belong to class 1 • 37 instances -\> predicted as 1 but actually belong to class 0 • 57 instances -\> predicted as 1 and actually belong to class 1
 
 The accuracy has been calculated as 0.6131, which meant that the model correctly predicted the outcome for approximately 61.31% of the instances. Based on these metrics, we could observe that the performance in terms of accuracy, sensitivity, specificity, and negative predictive value has been slightly worse in the current input compared to the previous input. However, the positive predictive value has been slightly better with 62.16% in the current input.
 
