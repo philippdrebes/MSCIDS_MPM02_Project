@@ -407,7 +407,7 @@ summary(model.glm)
 We also wanted to try to predict an employees age by their amount of experience and multiple other factors. We took the Poisson regression model and fitted it to the 'age' variable using the glm() function.
 
 ```{r}
-glm.age <- glm(age ~ ., data = turnover.reduced, family = "poisson")
+glm.age <- glm(age ~ ., data = turnover.reduced, family = "quasipoisson")
 summary(glm.age)
 
 
@@ -421,7 +421,7 @@ cl <- makeCluster(8)  # number of cores as per your machine
 registerDoParallel(cl)
 
 # train the model
-model.glm <- train(age ~ ., data=turnover.reduced, family = "poisson", 
+model.glm <- train(age ~ ., data=turnover.reduced, family = "quasipoisson", 
                method="glm", preProcess=c("scale", "center"), trControl=control)
 
 # Stop the parallel processing
