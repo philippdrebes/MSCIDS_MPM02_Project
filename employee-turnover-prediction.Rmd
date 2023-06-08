@@ -335,6 +335,20 @@ print(selected_features)
 We used feature selection using recursive feature elimination (RFE) before training our model. It begun by setting the seed for reproducibility. The control parameters for the RFE process were defined, specifying the use of "rfFuncs" functions and cross-validation with 10 folds. A formula has been defined for the GAM model, including the smooth term for "age" with a truncated power basis. Subset sizes and a tuning grid for the feature selection process also have been specified. Parallel processing has been enabled using 8 cores. The feature selection algorithm has been run using RFE, taking the one-hot encoded dataset as predictors and the "event" column as the dependent variable. After the process, the parallel processing has been stopped, and the environment has been cleaned up. No features where selected. Therefore, we used again the `turnover.reduced` data set, where we tried a different approach.
 
 ```{r}
+set.seed(12)
+indices <- createDataPartition(turnover.reduced$event, p=.85, list = F)
+
+train <- turnover.reduced %>%
+  slice(indices[, 1])
+test_in <- turnover.reduced %>%
+  slice(-indices[, 1]) %>%
+  dplyr::select(-event)
+test_truth <- turnover.reduced %>%
+  slice(-indices[, 1]) %>%
+  pull(event)
+```
+
+```{r}
 # ensure results are repeatable
 set.seed(12)
 
@@ -342,11 +356,11 @@ set.seed(12)
 control <- trainControl(method="repeatedcv", number=10, repeats=3)
 
 # Enable parallel processing
-cl <- makeCluster(8)  # number of cores as per your machine
+cl <- makeCluster(4)  # number of cores as per your machine
 registerDoParallel(cl)
 
 # train the model
-model.gam <- train(event ~ ., data=turnover.reduced, family = "binomial", 
+model.gam <- train(event ~ ., data=train, family = "binomial", 
                method="gam", preProcess=c("scale", "center"), trControl=control)
 
 # Stop the parallel processing
@@ -363,6 +377,16 @@ plot(importance)
 summary(model.gam)
 plot(model.gam, residuals = TRUE)
 AIC(model.gam$finalModel)
+
+# Make predictions on the testing data
+test_pred <- predict(model.gam, newdata = test_in)
+
+# Convert test_truth to a factor with the same levels as test_pred
+test_truth <- factor(test_truth, levels = levels(test_pred))
+
+# Evaluate the performance of the model using confusion matrix
+conf_matrix <- confusionMatrix(test_pred, test_truth)
+conf_matrix
 ```
 
 The model has been fitted using a binomial family, indicating that the outcome variable is binary. The link function used is the logit, which perfectly well is suitable for modeling binary outcomes. The formula used for the model specified the relationship between the outcome variable (".outcome") and the predictor variables. Each predictor variable has been listed with a plus sign (+) before it. The parametric coefficient section provided the estimated coefficients, standard errors, z-values, and p-values for the predictor variables included in the model. These coefficients represented the linear effects of each predictor on the log-odds of the outcome variable. The intercept represented the estimated log-odds when all the predictor variables were zero. The z-value and p-value indicated the statistical significance of each coefficient. The approximate significance of the smooth terms section provided the approximate significance of the smooth terms included in the model. The "edf" represented the effective degrees of freedom for each smooth term. The "Chi.sq" value has been the chi-square statistic associated with each smooth term, and the p-value indicated its statistical significance. The adjusted R-squared value (R-sq.(adj)) represented the proportion of the variance in the outcome variable explained by the model. The Deviance explained represented the percentage of deviance in the outcome variable explained by the model. UBRE (Unbiased Risk Estimate) has been an estimation of the expected prediction error while scale est. represented the estimated dispersion parameter of the binomial distribution, and N represented the number of observations used in the model.
@@ -383,7 +407,7 @@ set.seed(12)
 control <- trainControl(method="repeatedcv", number=10, repeats=3)
 
 # Enable parallel processing
-cl <- makeCluster(8)  # number of cores as per your machine
+cl <- makeCluster(4)  # number of cores as per your machine
 registerDoParallel(cl)
 
 # train the model
@@ -402,6 +426,16 @@ importance <- varImp(model.glm, scale=FALSE)
 plot(importance)
 
 summary(model.glm)
+
+# Make predictions on the testing data
+test_pred <- predict(model.glm, newdata = test_in)
+
+# Convert test_truth to a factor with the same levels as test_pred
+test_truth <- factor(test_truth, levels = levels(test_pred))
+
+# Evaluate the performance of the model using confusion matrix
+conf_matrix <- confusionMatrix(test_pred, test_truth)
+conf_matrix
 ```
 
 We also wanted to try to predict an employees age by their amount of experience and multiple other factors. We took the Poisson regression model and fitted it to the 'age' variable using the glm() function.
@@ -417,7 +451,7 @@ set.seed(2)
 control <- trainControl(method="repeatedcv", number=10, repeats=3)
 
 # Enable parallel processing
-cl <- makeCluster(8)  # number of cores as per your machine
+cl <- makeCluster(4)  # number of cores as per your machine
 registerDoParallel(cl)
 
 # train the model
@@ -436,6 +470,16 @@ importance <- varImp(model.glm, scale=FALSE)
 plot(importance)
 
 summary(model.glm)
+
+# Make predictions on the testing data
+test_pred <- predict(model.glm, newdata = test_in)
+
+# Convert test_truth to a factor with the same levels as test_pred
+test_truth <- factor(test_truth, levels = levels(test_pred))
+
+# Evaluate the performance of the model using confusion matrix
+conf_matrix <- confusionMatrix(test_pred, test_truth)
+conf_matrix
 ```
 
 Our deviance residuals ranged from -1.3870 to 2.4394, indicating some variability between the observed and predicted values. Positive residuals indicated that the predicted age is higher than the observed age, while negative residuals indicated that the predicted age has been lower than the observed age. The first quartile (1Q) has been -0.4718, the median has been -0.3178, and the third quartile (3Q) has been -0.1741. These values suggested that the model has some variability in its fit to the data, but the median residual is closer to zero, indicating a reasonably good fit.
