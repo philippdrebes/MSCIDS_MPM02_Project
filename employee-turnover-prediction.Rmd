@@ -30,7 +30,7 @@ Our main idea has been to identify factors that contribute to employee turnover,
 The dataset we will be using is the [Employee Turnover](https://www.kaggle.com/datasets/davinwijaya/employee-turnover) data set. This data set contains the following information about the employees of a company.
 
 | Column       | Description                                                                                                                                                |
-|----------------|--------------------------------------------------------|
+|------------------|------------------------------------------------------|
 | stag         | Experience (time)                                                                                                                                          |
 | event        | Employee turnover                                                                                                                                          |
 | gender       | Employee's gender, female(f), or male(m)                                                                                                                   |
@@ -153,16 +153,17 @@ plot(density(turnover$age))
 vioplot(turnover$age)
 ```
 
-The interpretation of the data shows immediately, that the dataset contains more young people than older. It peaks from 25 - 30 years old, has as well much 20 to 35 years old, and declines steadily from 35 to 60 years old. Also you see, that there are about three times as many female individuals, than male. 
+The interpretation of the data shows immediately, that the dataset contains more young people than older. It peaks from 25 - 30 years old, has as well much 20 to 35 years old, and declines steadily from 35 to 60 years old. Also you see, that there are about three times as many female individuals, than male.
 
 We then thougth, that there migth be the possibility, that due to the new generational behaviour from generation (Y), Z and A, there is a higher churn rate as their generations tend to have shorter periods of employment. So we plotted the plot below, to analyze this hypothesis:
 
 ```{r}
 # Convert 'event' to factor if it's not already
-turnover$event <- as.factor(turnover$event)
+turnover2 <- turnover
+turnover2$event <- as.factor(turnover2$event)
 
 # Create a bar chart showing count of individuals who left or stayed by age
-ggplot(turnover, aes(x = age, fill = event)) +
+ggplot(turnover2, aes(x = age, fill = event)) +
   geom_bar(position = "dodge") +
   xlab("Age") +
   ylab("Count") +
@@ -410,7 +411,7 @@ The model has been fitted using a binomial family, indicating that the outcome v
 
 It has been still not a good fit, with only around 10.1% of the variation and about 9.89% of the deviance in the outcome explained. We also saw, that the feature selection only had a slight, almost negligible, impact on accuracy.
 
-### Generalized Linear Models - binomial / poisson 
+### Generalized Linear Models - binomial / poisson
 
 Next we have fit a generalized linear model in order to predict employee turnover.
 
@@ -698,32 +699,38 @@ barplot(prediction_counts, beside = TRUE, legend = TRUE,
         ylab = "Count", col = c("blue", "green"), names.arg = c("Retained", "Left"))
 ```
 
-The employee turnover has been represented by the 'event' variable, where the accuracy of our model has been 0.6242604, which meant that the model correctly predicted the employee turnover status for approximately 62.42% of the cases in the test data. However, accuracy alone has not been providing a complete picture of the model's performance, especially in imbalanced datasets where the number of employees who leave the company -> churn, is much smaller than those who stay -> non-churn.
+The employee turnover has been represented by the 'event' variable, where the accuracy of our model has been 0.6242604, which meant that the model correctly predicted the employee turnover status for approximately 62.42% of the cases in the test data. However, accuracy alone has not been providing a complete picture of the model's performance, especially in imbalanced datasets where the number of employees who leave the company -\> churn, is much smaller than those who stay -\> non-churn.
 
 ### Conclusion
 
 #### Exploration
+
 We started with the initial exploratory analysis of our dataset, where our first interpretation of the datasat has been, that the age of individuals peaks from 25 - 30 years old, with many 20 - 35 years old, and a steady decline from 35 to 60 years. There were about three times as many female individuals, than male.
 
 #### One-Hot Encoding
+
 The variables "extraversion," "independ," "selfcontrol," "anxiety," "novator," "age," and "stag" were specifically selected for normalization in the One-Hot encoding chapter, due to the variables which represented different attributes of measurements.
 
 #### Linear Models
+
 The Analysis through the linear model showed that the significance level with three stars, where it has been indicated that there is a high level of statistical significance, has been found in "age", "professionSales", "professionMarketing", "professionmanage", "professionIT", "professionHR", "professionetc", "professionEngineer", "professionConsult", "professionCommercial", "professionBusinessDevelopment" and "industryRealEstate". A moderate level of statistical significance has been shown in the significance level with two stars, where the categories "industryPharma", "industryRetail", "industryTelecom" and "professionPR" belonged to. Last but not least a lower level of statistical significance has been shown in "professionTeaching", "professionLaw", "professionFinance", "industrymanufacture" and "industryBuilding". Multiple R-Squared showed that approximately 11.58% of the variation in the dependent variable has been explained by the independent variables. The F-statistic has 31 and 1097 degrees of freedom, where as a larger F-statistic suggested a better overall fit of the model.
 
 #### Non-linearities
+
 Next we checked for non-linearity, where it appeared that only the factor age had a big non-linear behavior, where as anxiety and selfcontrol had a minimal indicator for non-linear behavior.
 
 Afterwards we startet with the training of the model. Therefore we used feature selection using recursive feature elimination (RFE) before training the model. As learned in class we have set the seed for reproducibility, defined control parameters and specified functions, and performed cross-validation with 10 folds. But no features have been selected during the whole process, so we had to try another approach.
 
 In the new approach, the model has been fitted using a binomial family, with "industryIT", "professionHR" as highly significant and "industryBanks", "professionIT", "trafficreferal", "wayfootas" as significant. The R-squared adjusted value has been indicating the proportion of variance in the outcome variable that has been explained by the model. In our case, the adjusted R-squared was 0.101, suggesting that the model explained approximately 10.1% of the variance in the outcome. Whereas the deviance explained was 9.89%, indicating the proportion of deviance in the outcome variable that has been accounted for by the model.
 
-#### Generalized Linear Models - binomial / poisson 
-As this has been still not a good fit, we fit a generalized linear model. There the note "3 not defined because of singularities" suggested that three coefficients were not estimated due to singularities. This meant that linear dependencies or perfect multicollinearity among the predictor variables existed, making it impossible to estimate the individual effects of those variables. There were several values with significance codes of two stars: "industryBanks", "industryBuilding", "industryConsult", "trafficrabrecNErab", "trafficreferal", "wayfoot", as well as two with only one star: "stag" and "trafficempjs". 
+#### Generalized Linear Models - binomial / poisson
+
+As this has been still not a good fit, we fit a generalized linear model. There the note "3 not defined because of singularities" suggested that three coefficients were not estimated due to singularities. This meant that linear dependencies or perfect multicollinearity among the predictor variables existed, making it impossible to estimate the individual effects of those variables. There were several values with significance codes of two stars: "industryBanks", "industryBuilding", "industryConsult", "trafficrabrecNErab", "trafficreferal", "wayfoot", as well as two with only one star: "stag" and "trafficempjs".
 
 Then next we wanted to predict an employees age by their amount of experience, so we used the poisson regression model.It was fitted using the glm() function. Our deviance residuals ranged from -1.3870 to 2.4394, indicating some variability between the observed and predicted values. Positive residuals indicated that the predicted age has been higher than the observed age, while negative residuals indicated that the predicted age has been lower than the observed age. The first quartile (1Q) was -0.4718, the median was -0.3178, and the third quartile (3Q) was -0.1741. These values suggested that the model had some variability in its fit to the data, but the median residual was closer to zero, indicating a reasonably good fit.
 
-#### Support Vector Machines 
+#### Support Vector Machines
+
 In the support vector machine chapter, we received the following output: The confusion matrix represented the counts of the predicted and actual values, where we received the following values:
 
 • 58 instances -\> predicted as 0 and actually belong to class 0 • 37 instances -\> predicted as 0 but actually belong to class 1 • 25 instances -\> predicted as 1 but actually belong to class 0 • 48 instances -\> predicted as 1 and actually belong to class 1
@@ -737,23 +744,24 @@ After using the `tune` function again and also trying different kernels for the 
 The accuracy has been calculated as 0.6131, which meant that the model correctly predicted the outcome for approximately 61.31% of the instances. Based on these metrics, we could observe that the performance in terms of accuracy, sensitivity, specificity, and negative predictive value has been slightly worse in the current input compared to the previous input. However, the positive predictive value has been slightly better with 62.16% in the current input.
 
 #### Artificial Neural Networks
-TThe accuracy of our model has been 0.6242604, which meant that the model correctly predicted the employee turnover status for approximately 62.42% of the cases in the test data. 
+
+TThe accuracy of our model has been 0.6242604, which meant that the model correctly predicted the employee turnover status for approximately 62.42% of the cases in the test data.
 
 ### Client Advisory Report
 
-We were able to gain some insights and suggestions for your employee turnover problem. 
+We were able to gain some insights and suggestions for your employee turnover problem.
 
-Our data exploration identified that the most represented age group in your workforce has been between 20 and 35, where we first considered that the age might be one reason for a higher turnover rate, as especially generation (Y), Z and A have a shorter employment relationship than generation X. So we generated a plot which you have in detail in the "exploration" chapter, to understand this matter in depth. 
+Our data exploration identified that the most represented age group in your workforce has been between 20 and 35, where we first considered that the age might be one reason for a higher turnover rate, as especially generation (Y), Z and A have a shorter employment relationship than generation X. So we generated a plot which you have in detail in the "exploration" chapter, to understand this matter in depth.
 
 We then explored various machine learning models to predict employee turnover and found varying degrees of accuracy across different models. The linear and generalized linear models could explain about 10% to 11.5% of the variation in employee turnover with factors like age, profession, and industry showing varying degrees of significance. However, the models were limited in their predictive capabilities and indicated potential multicollinearity issues among predictor variables.
 
 We also evaluated the application of support vector machines and artificial neural networks. The support vector machine (SVM) model correctly predicted approximately 63.1% of the cases, significantly better than simply predicting the most common class. Although it had a fair level of agreement between predictions and actual values, there's room for improvement. When we tried different kernels and tuning for the SVM model, the accuracy slightly dropped to around 61.31%. The artificial neural network (ANN) model, on the other hand, showed a promising result with an accuracy of around 62.42%.
 
-Given the current results, we suggest continuing with the Support Vector Machine model or the Artificial Neural Network (ANN) model as they achieved one of the highest accuracies and they are known for their ability to handle complex relationships between variables. We suggest to check in a next step a random forest model, to see if it outperforms the SVM and ANN results. We also advice to use more data for any further analysis, as the performance of the model is dependent on the input data aswell. Once the analysis of the random forest model, and other suitable models has been done, we recommend a profound analysis of precision, recall and accuracy, to make a final decision on with which model to proceed. 
+Given the current results, we suggest continuing with the Support Vector Machine model or the Artificial Neural Network (ANN) model as they achieved one of the highest accuracies and they are known for their ability to handle complex relationships between variables. We suggest to check in a next step a random forest model, to see if it outperforms the SVM and ANN results. We also advice to use more data for any further analysis, as the performance of the model is dependent on the input data aswell. Once the analysis of the random forest model, and other suitable models has been done, we recommend a profound analysis of precision, recall and accuracy, to make a final decision on with which model to proceed.
 
 Given the considerable role of profession, industry, and age in predicting employee turnover, we recommend taking these into account in your HR strategies. Implementing focused retention strategies targeting high-risk groups should prove beneficial in the long term. We suggest to conduct further research to understand why these variables particularly influence turnover.
 
-Kindly let us know if you have further questions or need additional analyses, thank you for the great collaboration. 
+Kindly let us know if you have further questions or need additional analyses, thank you for the great collaboration.
 
 # Quotes
 
