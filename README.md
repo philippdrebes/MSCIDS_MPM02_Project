@@ -29,16 +29,16 @@ The project will be structured as follows:
 ## Project Deliverables
 The following deliverables will be submitted for this project:
 
-- Jupyter Notebook in PDF format
-- Jupyter Notebook containing all code and analysis
+- RMarkdown in PDF format
+- RMarkdown containing all code and analysis
 - README file containing project overview and instructions for reproducing the analysis
 
 ## How to Reproduce the Analysis
 To reproduce the analysis, follow these steps:
 
 1. Clone the project repository: `git clone https://github.com/philippdrebes/MSCIDS_MPM02_Project` 
-2. Launch Jupyter Notebook: `jupyter notebook`
-3. Open the `employee-turnover-prediction.ipynb` file and run the cells in order.
+2. Launch R Studio
+3. Open the `employee-turnover-prediction.Rmd` file and run the cells in order.
 
 Note: You may need to adjust file paths in the notebook to match your local file system.
 
