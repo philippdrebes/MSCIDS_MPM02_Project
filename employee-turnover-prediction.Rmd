@@ -68,8 +68,7 @@ library(mlbench, quietly = T)
 library(caret, quietly = T)
 library(arm, quietly = T)
 library(doParallel, quietly = T)
-install.packages("randomForest")
-library(randomForest)
+library(randomForest, quietly = T)
 ```
 
 Then we are loading and inspecting our data:
@@ -531,10 +530,6 @@ The accuracy has been calculated as 0.6131, which means that the model correctly
 In this chapter, we will be exploring Artificial Neural Networks (ANN). ANN is a machine learning algorithm inspired by the biological structure of the human brain. We will explain how ANN works, how to train an ANN model, and how to use it to predict employee turnover.
 
 ```{r}
-install.packages("neuralnet")
-install.packages("mlr3")
-install.packages("mlr3misc")
-install.packages("caret")
 #library(keras)
 #library(mlr3)
 #library(mlr3misc)
@@ -545,7 +540,7 @@ library(caTools)  # For data splitting
 library(nnet)
 
 # Read the CSV file into a data frame
-turnover <- read.csv("turnover.csv")
+turnover <- read.csv("data/turnover.csv")
 ```
 
 In a first step we want to examine the structure of our data frame 'turnover', to receive information about the variables included, their data types and to see a short previe of the data. We determine the dimensions of our data frame, to receive an idea of its size (rows and colums). Last but not least, our goal is to identify missing values.
@@ -642,7 +637,7 @@ barplot(prediction_counts, beside = TRUE, legend = TRUE,
 
 The employee turnover is represented by the 'event' variable, where the accuracy of our model is 0.6242604, which means the model correctly predicted the employee turnover status for approximately 62.42% of the cases in the test data. However, accuracy alone is not providing a complete picture of the model's performance, especially in imbalanced datasets where the number of employees who leave the company (churn) is much smaller than those who stay (non-churn).
 
-### Conclusion
+## Conclusion
 
 We started with the initial exploratory analysis of our dataset, where a first trend showed that fluctuation tends to be higher when an individual is younger by age.
 
@@ -672,11 +667,11 @@ After using the `tune` function again and also trying different kernels for the 
 
 The accuracy has been calculated as 0.6131, which means that the model correctly predicted the outcome for approximately 61.31% of the instances. Based on these metrics, we could observe that the performance in terms of accuracy, sensitivity, specificity, and negative predictive value is slightly worse in the current input compared to the previous input. However, the positive predictive value is slightly better with 62.16% in the current input.
 
-#### Final Words
+## Final Words
 
 It has been interesting for our group to try those concepts in a practical approach, once we have learned them in class. Now we understand them not only in theory, but also in an applied way.
 
-# Quotes
+## Quotes
 
 (Peoplekeep, 2023)
 
