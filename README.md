@@ -19,12 +19,10 @@ The dataset we will be using is the [Employee Turnover](https://www.kaggle.com/d
 
 ## Project Structure
 
-The project will be structured as follows:
-
-1. Data Cleaning and Exploration: We will explore the dataset and perform any necessary data cleaning and preprocessing.
-2. Model Building: We will use the machine learning algorithms mentioned above to develop predictive models for employee turnover.
-3. Model Evaluation: We will evaluate the performance of each model using appropriate metrics and select the best model.
-4. Conclusion: We will summarize our findings and discuss any insights gained from the analysis.
+- data/turnover.csv -> data set
+- employee-turnover-prediction.Rmd -> RMarkdown file containing the analysis
+- Employee_Turnover_Prediction.pdf -> RMarkdown file compiled as PDF
+- README.md -> this file
 
 ## Project Deliverables
 The following deliverables will be submitted for this project:
