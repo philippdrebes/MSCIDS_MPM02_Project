@@ -30,7 +30,7 @@ Our main idea has been to identify factors that contribute to employee turnover,
 The dataset we will be using is the [Employee Turnover](https://www.kaggle.com/datasets/davinwijaya/employee-turnover) data set. This data set contains the following information about the employees of a company.
 
 | Column       | Description                                                                                                                                                |
-|-------------|-----------------------------------------------------------|
+|----------------|--------------------------------------------------------|
 | stag         | Experience (time)                                                                                                                                          |
 | event        | Employee turnover                                                                                                                                          |
 | gender       | Employee's gender, female(f), or male(m)                                                                                                                   |
@@ -618,6 +618,8 @@ predicted_values <- predict(ann_model, newdata = test_data, type = "class")
 # Calculate accuracy
 accuracy <- sum(predicted_values == test_data$event) / nrow(test_data)
 cat("Accuracy: ", accuracy, "\n")
+
+confusionMatrix(factor(predicted_values), test_data$event)
 ```
 
 Next we created a data frame where we showed the predicted and actual values. We then counted the occurences of each unique combination of predicted and actual values in the "prediction_data" data frame. This created a table that showed the frequency of each combination. Lastly, we created a bar plot, to be able to visualize the comparison between the predicted and actual values.
@@ -643,7 +645,7 @@ We started with the initial exploratory analysis of our dataset, where a first t
 
 The variables "extraversion," "independ," "selfcontrol," "anxiety," "novator," "age," and "stag" were specifically selected for normalization in the One-Hot encoding chapter, due to the variables which represented different attributes of measurements.
 
-The Analysis through the linear model showed that the significance level with three stars, where it has been indicated that there is a high level of statistical significance, has been found in "age", "professionSales", "professionMarketing", "professionmanage", "professionIT", "professionHR", "professionetc", "professionEngineer", "professionConsult", "professionCommercial", "professionBusinessDevelopment" and "industryRealEstate". A moderate level of statistical significance has been shown in the significance level with two stars, where the categories "industryPharma", "industryRetail", "industryTelecom" and "professionPR" belonged to. Last but not least a lower level of statistical significance has been shown in "professionTeaching", "professionLaw", "professionFinance", "industrymanufacture" and "industryBuilding". Multiple R-Squared showed that approximately 11.58% of the variation in the dependent variable has been explained by the independent variables. The F-statistic has 31 and 1097 degrees of freedom, where as a larger F-statistic suggested a better overall fit of the model.
+The Analysis through the linear model showed that the significance level with three stars, where it has been indicated that there is a high level of statistical significance, has been found in "age", "professionSales", "professionMarketing", "professionmanage", "professionIT", "professionHR", "professionetc", "professionEngineer", "professionConsult", "professionCommercial", "professionBusinessDevelopment" and "industryRealEstate". A moderate level of statistical significance has been shown in the significance level with two stars, where the categories "industryPharma", "industryRetail", "industryTelecom" and "professionPR" belonged to. Last but not least a lower level of statistical significance has been shown in "professionTeaching", "professionLaw", "professionFinance", "industrymanufacture" and "industryBuilding".
 
 Next we checked for non-linearity, where it appeared that only the factor age had a big non-linear behavior, where as anxiety and selfcontrol had a minimal indicator for non-linear behavior.
 
